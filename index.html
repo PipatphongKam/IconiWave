@@ -1,0 +1,1605 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-[#1B191A] text-[#E9E4E0] select-none">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IconiWave — Audio Experience & Visualizer</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            charcoal: {
+              DEFAULT: '#1B191A',
+              light: '#252224',
+              dark: '#131112',
+              card: '#221F20'
+            },
+            terracotta: {
+              DEFAULT: '#943A1F',
+              light: '#B24929',
+              dark: '#742C15',
+              glow: '#D15834'
+            },
+            offwhite: {
+              DEFAULT: '#E9E4E0',
+              muted: '#A59F9A',
+              dim: '#65605C'
+            }
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            display: ['"Syne"', '"Plus Jakarta Sans"', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    :root {
+      --accent-primary: #943A1F;
+      --accent-light: #d9532d;
+      --accent-glow: #D15834;
+      --accent-dark: #742C15;
+      --accent-rgb: 148, 58, 31;
+      --accent-glow-rgb: 209, 88, 52;
+    }
+
+    /* Global smooth color transition */
+    .theme-transition {
+      transition: color 0.35s ease, background-color 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #1B191A; }
+    ::-webkit-scrollbar-thumb { background: #353032; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--accent-primary); }
+
+    /* Custom range input */
+    input[type="range"] {
+      -webkit-appearance: none;
+      background: #353032;
+      border-radius: 9999px;
+      height: 4px;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      height: 12px;
+      width: 12px;
+      border-radius: 50%;
+      background: #E9E4E0;
+      cursor: pointer;
+      box-shadow: 0 0 8px rgba(var(--accent-rgb), 0.6);
+      transition: transform 0.15s ease, background 0.15s ease;
+    }
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.3);
+      background: var(--accent-light);
+    }
+
+    /* Ambient pulse */
+    @keyframes slowFloat {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-10px) rotate(1deg); }
+    }
+    .animate-float {
+      animation: slowFloat 7s ease-in-out infinite;
+    }
+
+    @keyframes orbPulse {
+      0%, 100% { transform: scale(1); opacity: 0.9; }
+      50% { transform: scale(1.03); opacity: 1; }
+    }
+    .animate-orb {
+      animation: orbPulse 5s ease-in-out infinite;
+    }
+
+    /* Ambient Background Keyframes & Glows */
+    @keyframes ambientDriftRight {
+      0%, 100% {
+        transform: translate3d(0, 0, 0) scale(1);
+      }
+      50% {
+        transform: translate3d(-30px, 20px, 0) scale(1.08);
+      }
+    }
+
+    @keyframes ambientDriftLeft {
+      0%, 100% {
+        transform: translate3d(0, 0, 0) scale(1);
+      }
+      50% {
+        transform: translate3d(25px, -25px, 0) scale(1.06);
+      }
+    }
+
+    @keyframes ambientDriftBottom {
+      0%, 100% {
+        transform: translate3d(0, 0, 0) scale(1);
+      }
+      50% {
+        transform: translate3d(-15px, -20px, 0) scale(1.1);
+      }
+    }
+
+    .ambient-glow-right {
+      animation: ambientDriftRight 12s ease-in-out infinite;
+      will-change: transform, opacity;
+    }
+
+    .ambient-glow-left {
+      animation: ambientDriftLeft 15s ease-in-out infinite;
+      will-change: transform, opacity;
+    }
+
+    .ambient-glow-bottom {
+      animation: ambientDriftBottom 10s ease-in-out infinite;
+      will-change: transform, opacity;
+    }
+  </style>
+</head>
+
+<body class="h-screen w-screen overflow-hidden flex flex-col justify-between bg-[#1B191A] font-sans antialiased text-[#E9E4E0] relative">
+
+  <!-- ==================== AMBIENT BACKGROUND GLOW LAYERS ==================== -->
+  <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden select-none">
+    <!-- Hero Artwork Ambient Glow (Right side behind sculpture) -->
+    <div id="ambientHeroGlow" class="absolute top-1/2 right-[-5%] sm:right-[5%] lg:right-[8%] -translate-y-1/2 w-[520px] h-[520px] sm:w-[650px] sm:h-[650px] lg:w-[780px] lg:h-[780px] rounded-full blur-[130px] ambient-glow-right transition-all duration-500" style="background: radial-gradient(circle, rgba(var(--accent-rgb), 0.45) 0%, rgba(var(--accent-glow-rgb), 0.30) 45%, transparent 70%);"></div>
+
+    <!-- Top-Left Soft Glow (Balances typography area with warm neon bloom) -->
+    <div id="ambientLeftGlow" class="absolute -top-24 -left-24 w-[420px] h-[420px] sm:w-[540px] sm:h-[540px] rounded-full blur-[140px] ambient-glow-left transition-all duration-500" style="background: radial-gradient(circle, rgba(var(--accent-rgb), 0.28) 0%, transparent 70%);"></div>
+
+    <!-- Bottom-Left Decorative Sphere Glow -->
+    <div id="ambientBottomGlow" class="absolute bottom-[-8%] left-[8%] w-[360px] h-[360px] sm:w-[460px] sm:h-[460px] rounded-full blur-[110px] ambient-glow-bottom transition-all duration-500" style="background: radial-gradient(circle, rgba(var(--accent-rgb), 0.35) 0%, transparent 70%);"></div>
+
+    <!-- Center Depth Subtle Gradient Mesh -->
+    <div id="ambientCenterGlow" class="absolute top-1/3 left-1/3 w-[520px] h-[520px] rounded-full blur-[160px] transition-all duration-500" style="background: rgba(var(--accent-rgb), 0.12);"></div>
+
+    <!-- Film Vignette Mask to keep editorial edges crisp and legible -->
+    <div class="absolute inset-0 bg-radial from-transparent via-transparent to-[#1B191A]/60 mix-blend-multiply"></div>
+  </div>
+
+  <!-- ==================== HEADER / NAV BAR ==================== -->
+  <header class="relative z-30 flex items-center justify-between px-8 md:px-16 pt-8 pb-4">
+    <!-- Logo with geometric colored slashes -->
+    <div class="flex items-center space-x-4 cursor-pointer group" id="logoBtn">
+      <div class="flex space-x-1 items-center">
+        <div class="w-1.5 h-6 rounded-sm transform -skew-x-12 theme-transition" style="background-color: var(--accent-primary);"></div>
+        <div class="w-1.5 h-6 rounded-sm transform -skew-x-12 opacity-80 group-hover:opacity-100 theme-transition" style="background-color: var(--accent-light);"></div>
+        <div class="w-1.5 h-6 rounded-sm transform -skew-x-12 opacity-60 group-hover:opacity-100 theme-transition" style="background-color: var(--accent-glow);"></div>
+      </div>
+      <span class="font-bold tracking-widest text-lg font-display uppercase text-offwhite group-hover:text-[var(--accent-light)] theme-transition">IconiWave</span>
+    </div>
+
+    <!-- Navigation Menu (Editorial Style) -->
+    <nav class="hidden lg:flex items-center space-x-8 text-xs font-semibold tracking-widest uppercase text-offwhite-muted">
+      <button id="navNowPlaying" class="text-offwhite hover:text-[var(--accent-light)] theme-transition relative py-1 after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-full after:h-[2px]" style="--tw-after-bg: var(--accent-primary);">
+        NOW PLAYING
+      </button>
+      <button id="navVisualizer" class="hover:text-offwhite transition-colors">
+        VISUALIZER MODES
+      </button>
+      <button id="navSoundFx" class="hover:text-offwhite transition-colors">
+        SOUND FX
+      </button>
+      <button id="navPresets" class="hover:text-offwhite transition-colors">
+        PRESETS
+      </button>
+    </nav>
+
+    <!-- Right Controls: Theme Switcher & Utility buttons -->
+    <div class="flex items-center space-x-3 md:space-x-4">
+      
+      <!-- Minimalist Theme Picker (6 Color Dots) -->
+      <div class="flex items-center space-x-1.5 bg-charcoal-card/90 border border-white/10 px-2.5 py-1.5 rounded-full shadow-inner backdrop-blur-md" id="themePickerContainer">
+        <!-- Injected via JavaScript -->
+      </div>
+
+      <label for="audioFileInput" class="flex items-center space-x-2 text-xs font-medium bg-charcoal-card hover:bg-white/5 text-offwhite border border-white/10 hover:border-[var(--accent-light)] px-3.5 py-2 rounded-full cursor-pointer theme-transition">
+        <i data-lucide="upload" class="w-3.5 h-3.5" style="color: var(--accent-light);"></i>
+        <span class="hidden sm:inline">Upload Audio</span>
+      </label>
+      <input type="file" id="audioFileInput" accept="audio/*" class="hidden">
+
+      <button id="modalInfoBtn" class="p-2 text-offwhite-muted hover:text-offwhite hover:bg-white/5 rounded-full transition-colors" title="Settings & About">
+        <i data-lucide="info" class="w-4 h-4"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- ==================== HERO MAIN CONTAINER ==================== -->
+  <main class="relative z-10 flex-1 grid grid-cols-1 lg:grid-cols-12 items-center px-8 md:px-16 gap-8 overflow-y-auto lg:overflow-visible">
+    
+    <!-- LEFT COLUMN: Typography, Smooth Real-time Waveform & Audio Controls -->
+    <section class="lg:col-span-6 flex flex-col justify-center space-y-6 lg:pr-6 z-20">
+      
+      <!-- Subtitle badge -->
+      <div class="flex items-center space-x-3">
+        <span class="inline-block w-2 h-2 rounded-full animate-ping theme-transition" style="background-color: var(--accent-primary);"></span>
+        <p id="trackCategory" class="text-xs tracking-[0.25em] uppercase font-bold text-offwhite-muted">
+          OUR VERSION • EXPERIENCE 01
+        </p>
+      </div>
+
+      <!-- Massive Track Title (Reference Design style) -->
+      <div class="space-y-1">
+        <h1 id="trackTitle" class="text-5xl md:text-7xl lg:text-8xl font-black font-display tracking-tight text-offwhite uppercase leading-none">
+          DESIGN
+        </h1>
+      </div>
+
+      <!-- REAL-TIME SMOOTH WAVEFORM CANVAS (Directly between Title and Artist) -->
+      <div class="relative w-full bg-charcoal-card/60 backdrop-blur-md rounded-2xl border border-white/5 p-4 shadow-2xl overflow-hidden group">
+        <div class="flex items-center justify-between text-[11px] font-mono text-offwhite-dim uppercase tracking-wider mb-2">
+          <div class="flex items-center space-x-2">
+            <span class="w-1.5 h-1.5 rounded-full theme-transition" style="background-color: var(--accent-primary);"></span>
+            <span id="canvasModeLabel">Real-time Spectral Waveform</span>
+          </div>
+          <div class="flex items-center space-x-2">
+            <button id="toggleWaveStyle" class="text-offwhite-muted hover:text-[var(--accent-light)] transition-colors flex items-center space-x-1" title="Cycle visualizer modes">
+              <i data-lucide="sliders" class="w-3 h-3"></i>
+              <span id="waveStyleName">Wave</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Canvas for Audio Visualizer -->
+        <canvas id="waveformCanvas" class="w-full h-24 md:h-28 rounded-lg cursor-pointer" width="700" height="120"></canvas>
+        
+        <!-- Glow reflection inside canvas box -->
+        <div id="canvasGlowReflection" class="absolute -bottom-6 left-1/2 transform -translate-x-1/2 w-3/4 h-8 blur-xl pointer-events-none theme-transition" style="background-color: rgba(var(--accent-glow-rgb), 0.35);"></div>
+      </div>
+
+      <!-- Artist & Editorial Description -->
+      <div class="space-y-2 max-w-xl">
+        <p id="trackArtist" class="text-sm font-semibold uppercase tracking-wider theme-transition" style="color: var(--accent-light);">
+          Sculpted by IconiWave Sound Lab
+        </p>
+        <p id="trackDescription" class="text-offwhite-muted text-sm md:text-base font-normal leading-relaxed">
+          Our audio engine crafts a modern and soothing resonance, creating the key to deep immersion, ambient mindfulness, and emotional focus.
+        </p>
+      </div>
+
+      <!-- Interactive Controls (Circular Play/Pause button inspired by "See More" in Ref) -->
+      <div class="flex flex-wrap items-center gap-6 pt-2">
+        <!-- Main circular Play / Pause Button with aura border -->
+        <button id="mainPlayBtn" class="flex items-center space-x-4 group cursor-pointer">
+          <div id="playBtnCircle" class="relative flex items-center justify-center w-14 h-14 rounded-full border border-offwhite/30 transition-all duration-300 shadow-lg group-hover:border-[var(--accent-primary)] group-hover:bg-[var(--accent-primary)] group-hover:shadow-[0_0_35px_rgba(var(--accent-glow-rgb),0.85),0_0_15px_rgba(var(--accent-rgb),0.6)]">
+            <div id="playIconContainer" class="text-offwhite group-hover:text-white transition-colors transform group-hover:scale-110">
+              <i data-lucide="play" class="w-5 h-5 ml-0.5 fill-current"></i>
+            </div>
+            <!-- Ripple aura ring -->
+            <div id="playRing" class="absolute inset-0 rounded-full border opacity-0 group-hover:opacity-100 animate-ping pointer-events-none" style="border-color: var(--accent-primary);"></div>
+          </div>
+          <span id="playButtonText" class="text-sm font-bold uppercase tracking-widest text-offwhite group-hover:text-[var(--accent-light)] transition-colors">
+            Play Experience
+          </span>
+        </button>
+
+        <!-- Preset Switcher (Next / Prev) -->
+        <div class="flex items-center space-x-2 bg-charcoal-card border border-white/10 rounded-full px-3 py-1.5">
+          <button id="prevTrackBtn" class="p-1.5 text-offwhite-muted hover:text-offwhite hover:bg-white/5 rounded-full transition-colors" title="Previous Preset">
+            <i data-lucide="skip-back" class="w-4 h-4"></i>
+          </button>
+          <span id="presetIndicator" class="text-xs font-mono font-medium px-2 text-offwhite">01 / 03</span>
+          <button id="nextTrackBtn" class="p-1.5 text-offwhite-muted hover:text-offwhite hover:bg-white/5 rounded-full transition-colors" title="Next Preset">
+            <i data-lucide="skip-forward" class="w-4 h-4"></i>
+          </button>
+        </div>
+
+        <!-- Volume Control Slider -->
+        <div class="flex items-center space-x-2 bg-charcoal-card border border-white/10 rounded-full px-3.5 py-2">
+          <button id="muteBtn" class="text-offwhite-muted hover:text-offwhite transition-colors">
+            <i data-lucide="volume-2" id="volumeIcon" class="w-4 h-4"></i>
+          </button>
+          <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="0.75" class="w-20 cursor-pointer">
+        </div>
+
+        <!-- Sound FX / Filter toggle button -->
+        <button id="fxLoFiBtn" class="flex items-center space-x-1.5 text-xs font-semibold px-3.5 py-2 rounded-full border border-white/10 bg-charcoal-card hover:border-[var(--accent-primary)] text-offwhite-muted hover:text-offwhite transition-all">
+          <i data-lucide="disc" class="w-3.5 h-3.5 theme-transition" style="color: var(--accent-primary);"></i>
+          <span>Lo-Fi Mode: <span id="fxStatus" class="font-mono theme-transition" style="color: var(--accent-primary);">OFF</span></span>
+        </button>
+      </div>
+
+    </section>
+
+    <!-- RIGHT COLUMN: Iconic Terracotta Circle & Sculpture / Artwork Graphic (From Reference) -->
+    <section class="lg:col-span-6 relative flex items-center justify-center min-h-[380px] lg:min-h-[500px]">
+      
+      <!-- Big Accent Circle (The defining design element from Reference 1) -->
+      <div id="bigCircle" class="absolute w-[320px] h-[320px] sm:w-[420px] sm:h-[420px] lg:w-[480px] lg:h-[480px] rounded-full flex items-center justify-center transition-all duration-700 animate-orb" style="background: linear-gradient(135deg, var(--accent-light), var(--accent-primary), var(--accent-dark)); box-shadow: 0 0 50px rgba(var(--accent-glow-rgb), 0.65), 0 0 140px rgba(var(--accent-rgb), 0.55);">
+      </div>
+
+      <!-- Foreground Sculpture / Artwork Image with Duotone Blend -->
+      <div class="relative z-10 flex flex-col items-center group">
+        
+        <!-- Artwork frame with subtle floating animation -->
+        <div class="relative w-[280px] h-[340px] sm:w-[360px] sm:h-[440px] lg:w-[420px] lg:h-[500px] flex items-center justify-center animate-float">
+          
+          <img id="artworkImage" 
+               src="https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=900&q=80" 
+               alt="Iconic Artwork" 
+               class="max-w-full max-h-full object-contain filter drop-shadow-[0_20px_40px_rgba(0,0,0,0.8)] contrast-125 transition-all duration-500 rounded-2xl">
+
+          <!-- Duotone Accent Overlay Filter for seamless blend -->
+          <div id="duotoneOverlay" class="absolute inset-0 mix-blend-color pointer-events-none rounded-2xl theme-transition" style="background-color: rgba(var(--accent-rgb), 0.2);"></div>
+
+          <!-- Quick artwork change button overlay -->
+          <div class="absolute bottom-4 right-4 flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <label for="imageFileInput" class="p-2.5 bg-charcoal/90 hover:bg-[var(--accent-primary)] border border-white/20 rounded-full cursor-pointer shadow-lg transition-all" title="Upload Custom Artwork">
+              <i data-lucide="image" class="w-4 h-4 text-offwhite"></i>
+            </label>
+            <input type="file" id="imageFileInput" accept="image/*" class="hidden">
+
+            <button id="changeArtworkPresetBtn" class="p-2.5 bg-charcoal/90 hover:bg-[var(--accent-primary)] border border-white/20 rounded-full cursor-pointer shadow-lg transition-all" title="Random Preset Artwork">
+              <i data-lucide="refresh-cw" class="w-4 h-4 text-offwhite"></i>
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Small Floating Accent Sphere at the bottom left (matches the small circle in reference image 1) -->
+      <div id="smallSphere" class="absolute bottom-0 left-4 sm:left-12 w-20 h-20 sm:w-28 sm:h-28 rounded-full z-20 pointer-events-none transform -translate-y-4 animate-bounce theme-transition" style="background: linear-gradient(to top, var(--accent-dark), var(--accent-primary)); box-shadow: 0 0 25px rgba(var(--accent-glow-rgb), 0.85), 0 10px 40px rgba(var(--accent-rgb), 0.65); animation-duration: 4s;"></div>
+
+    </section>
+
+  </main>
+
+  <!-- ==================== BOTTOM BAR / PROGRESS SCRUBBER ==================== -->
+  <footer class="relative z-30 px-8 md:px-16 py-6 flex flex-col md:flex-row items-center justify-between gap-4 border-t border-white/5 bg-[#1B191A]/90 backdrop-blur-md">
+    
+    <!-- Progress Indicator styled as "01 ────────── 03" as seen in the reference photo -->
+    <div class="flex items-center space-x-4 w-full max-w-md">
+      <span id="footerCurrentIndex" class="text-xs font-mono font-bold text-offwhite tracking-widest">01</span>
+      
+      <!-- Interactive Scrubber Bar with Scrub / Drag & Hover Preview -->
+      <div id="progressBarContainer" class="relative flex-1 py-3 cursor-pointer group select-none flex items-center">
+        <!-- Background Track -->
+        <div class="h-1.5 w-full bg-charcoal-card rounded-full relative overflow-hidden">
+          <!-- Hover preview shadow bar -->
+          <div id="progressHoverFill" class="absolute left-0 top-0 h-full bg-white/10 rounded-full transition-all pointer-events-none" style="width: 0%;"></div>
+          <!-- Current playback fill -->
+          <div id="progressBarFill" class="h-full bg-offwhite group-hover:bg-[var(--accent-primary)] transition-all duration-75 rounded-full" style="width: 0%;"></div>
+        </div>
+        <!-- Draggable Scrubber Thumb Indicator with Enhanced Neon Glow -->
+        <div id="progressBarThumb" class="absolute top-1/2 -translate-y-1/2 w-3.5 h-3.5 bg-offwhite border-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-150 transform -translate-x-1/2 scale-90 group-hover:scale-110 pointer-events-none" style="left: 0%; border-color: var(--accent-primary); box-shadow: 0 0 18px rgba(var(--accent-glow-rgb), 1), 0 0 6px rgba(255, 255, 255, 0.9);"></div>
+        <!-- Time tooltip on hover -->
+        <div id="progressTooltip" class="absolute -top-6 -translate-x-1/2 px-2 py-0.5 bg-charcoal-card border border-white/15 rounded text-[10px] font-mono text-offwhite opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none shadow-xl">00:00</div>
+      </div>
+
+      <span id="footerTotalIndex" class="text-xs font-mono font-bold text-offwhite-dim tracking-widest">03</span>
+    </div>
+
+    <!-- Time & Engine Status -->
+    <div class="flex items-center space-x-6 text-xs font-mono text-offwhite-dim">
+      <div class="flex items-center space-x-2">
+        <span id="currentTimeDisplay">00:00</span>
+        <span>/</span>
+        <span id="durationDisplay">03:00</span>
+      </div>
+
+      <div class="hidden sm:flex items-center space-x-2">
+        <span class="w-2 h-2 rounded-full theme-transition" style="background-color: var(--accent-light);"></span>
+        <span id="engineStatusBadge">WebAudio Synthesizer Active</span>
+      </div>
+    </div>
+
+  </footer>
+
+  <!-- ==================== MODAL: AUDIO SETTINGS & INFO ==================== -->
+  <div id="infoModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-charcoal-card border border-white/10 rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl relative">
+      <div class="flex items-center justify-between border-b border-white/10 pb-3">
+        <div class="flex items-center space-x-2">
+          <div class="w-2 h-5 theme-transition" style="background-color: var(--accent-primary);"></div>
+          <h3 class="text-lg font-bold font-display text-offwhite">About IconiWave Engine</h3>
+        </div>
+        <button id="closeModalBtn" class="text-offwhite-muted hover:text-offwhite p-1">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="text-xs text-offwhite-muted space-y-3 leading-relaxed">
+        <p>
+          <strong class="text-offwhite">IconiWave</strong> is a minimalist single-page audio visualizer crafted in an editorial aesthetic inspired by Greek art and modern Bauhaus typography.
+        </p>
+        <div class="bg-charcoal p-3 rounded-lg border border-white/5 space-y-2">
+          <div class="text-offwhite font-semibold">Features:</div>
+          <ul class="list-disc list-inside space-y-1 text-offwhite-dim">
+            <li>Built-in real-time generative Ambient Polyphonic Synth</li>
+            <li>Custom audio file player (.mp3, .wav, .ogg, .m4a)</li>
+            <li>Real-time Web Audio Analyser node with multiple Canvas visualizer styles</li>
+            <li>Real-time Dynamic Palette Theme Switcher (6 distinct color themes)</li>
+            <li>Custom Artwork upload & switchable preset collection</li>
+            <li>Warm Vinyl Lo-Fi filter simulation</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="pt-2 flex justify-end">
+        <button id="closeModalBtn2" class="px-5 py-2 rounded-full text-white text-xs font-semibold uppercase tracking-wider transition-colors hover:brightness-110 theme-transition" style="background-color: var(--accent-primary);">
+          Got It
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== JAVASCRIPT LOGIC ==================== -->
+  <script>
+    // Initialize Lucide Icons
+    lucide.createIcons();
+
+    // ==========================================
+    // 0. THEMES PALETTE CONFIGURATION & CONTROLLER
+    // ==========================================
+    const THEMES = [
+      {
+        id: 'terracotta',
+        name: 'Terracotta Orange',
+        primary: '#943A1F',
+        light: '#d9532d',
+        glow: '#D15834',
+        dark: '#742C15',
+        rgb: '148, 58, 31',
+        glowRgb: '209, 88, 52'
+      },
+      {
+        id: 'crimson',
+        name: 'Crimson Red',
+        primary: '#8b1e1e',
+        light: '#c92a2a',
+        glow: '#e03131',
+        dark: '#661414',
+        rgb: '139, 30, 30',
+        glowRgb: '224, 49, 49'
+      },
+      {
+        id: 'violet',
+        name: 'Deep Violet',
+        primary: '#6b359c',
+        light: '#9c51e0',
+        glow: '#b16cf5',
+        dark: '#4e2373',
+        rgb: '107, 53, 156',
+        glowRgb: '177, 108, 245'
+      },
+      {
+        id: 'amber',
+        name: 'Amber Gold',
+        primary: '#a17016',
+        light: '#d49826',
+        glow: '#f0ad35',
+        dark: '#7a520d',
+        rgb: '161, 112, 22',
+        glowRgb: '240, 173, 53'
+      },
+      {
+        id: 'emerald',
+        name: 'Emerald Sage',
+        primary: '#23694a',
+        light: '#349469',
+        glow: '#43ba84',
+        dark: '#164731',
+        rgb: '35, 105, 74',
+        glowRgb: '67, 186, 132'
+      },
+      {
+        id: 'cobalt',
+        name: 'Cobalt Blue',
+        primary: '#1e4b8b',
+        light: '#2f6fd1',
+        glow: '#488cf2',
+        dark: '#143563',
+        rgb: '30, 75, 139',
+        glowRgb: '72, 140, 242'
+      }
+    ];
+
+    let currentTheme = THEMES[0];
+
+    function applyTheme(themeId) {
+      const found = THEMES.find(t => t.id === themeId);
+      if (!found) return;
+      currentTheme = found;
+
+      const root = document.documentElement;
+      root.style.setProperty('--accent-primary', currentTheme.primary);
+      root.style.setProperty('--accent-light', currentTheme.light);
+      root.style.setProperty('--accent-glow', currentTheme.glow);
+      root.style.setProperty('--accent-dark', currentTheme.dark);
+      root.style.setProperty('--accent-rgb', currentTheme.rgb);
+      root.style.setProperty('--accent-glow-rgb', currentTheme.glowRgb);
+
+      // Update Big Circle & Spheres with Enhanced Neon Glow
+      const bigCircle = document.getElementById('bigCircle');
+      if (bigCircle) {
+        bigCircle.style.background = `linear-gradient(135deg, ${currentTheme.light}, ${currentTheme.primary}, ${currentTheme.dark})`;
+        bigCircle.style.boxShadow = `0 0 50px rgba(${currentTheme.glowRgb}, 0.65), 0 0 140px rgba(${currentTheme.rgb}, 0.55)`;
+      }
+
+      const smallSphere = document.getElementById('smallSphere');
+      if (smallSphere) {
+        smallSphere.style.background = `linear-gradient(to top, ${currentTheme.dark}, ${currentTheme.primary})`;
+        smallSphere.style.boxShadow = `0 0 25px rgba(${currentTheme.glowRgb}, 0.85), 0 10px 40px rgba(${currentTheme.rgb}, 0.65)`;
+      }
+
+      // Update Duotone Overlay
+      const duotoneOverlay = document.getElementById('duotoneOverlay');
+      if (duotoneOverlay) {
+        duotoneOverlay.style.backgroundColor = `rgba(${currentTheme.rgb}, 0.2)`;
+      }
+
+      // Update Ambient Background Glows with High Vibrancy
+      const heroGlow = document.getElementById('ambientHeroGlow');
+      if (heroGlow) {
+        heroGlow.style.background = `radial-gradient(circle, rgba(${currentTheme.rgb}, 0.45) 0%, rgba(${currentTheme.glowRgb}, 0.30) 45%, transparent 70%)`;
+      }
+      const leftGlow = document.getElementById('ambientLeftGlow');
+      if (leftGlow) {
+        leftGlow.style.background = `radial-gradient(circle, rgba(${currentTheme.rgb}, 0.28) 0%, transparent 70%)`;
+      }
+      const bottomGlow = document.getElementById('ambientBottomGlow');
+      if (bottomGlow) {
+        bottomGlow.style.background = `radial-gradient(circle, rgba(${currentTheme.rgb}, 0.35) 0%, transparent 70%)`;
+      }
+      const centerGlow = document.getElementById('ambientCenterGlow');
+      if (centerGlow) {
+        centerGlow.style.backgroundColor = `rgba(${currentTheme.rgb}, 0.12)`;
+      }
+
+      // Update Canvas Glow reflection box
+      const canvasGlow = document.getElementById('canvasGlowReflection');
+      if (canvasGlow) {
+        canvasGlow.style.backgroundColor = `rgba(${currentTheme.glowRgb}, 0.35)`;
+      }
+
+      // Update Progress Bar Thumb glow
+      const thumb = document.getElementById('progressBarThumb');
+      if (thumb) {
+        thumb.style.borderColor = currentTheme.primary;
+        thumb.style.boxShadow = `0 0 18px rgba(${currentTheme.glowRgb}, 1), 0 0 6px rgba(255, 255, 255, 0.9)`;
+      }
+
+      // Update Theme Picker Active Rings
+      document.querySelectorAll('.theme-dot-btn').forEach(btn => {
+        if (btn.dataset.themeId === currentTheme.id) {
+          btn.classList.add('ring-2', 'ring-white', 'scale-125');
+          btn.classList.remove('opacity-80');
+        } else {
+          btn.classList.remove('ring-2', 'ring-white', 'scale-125');
+          btn.classList.add('opacity-80');
+        }
+      });
+    }
+
+    function initThemePicker() {
+      const container = document.getElementById('themePickerContainer');
+      if (!container) return;
+      container.innerHTML = '';
+
+      THEMES.forEach(t => {
+        const btn = document.createElement('button');
+        btn.dataset.themeId = t.id;
+        btn.title = t.name;
+        btn.className = `theme-dot-btn w-3.5 h-3.5 md:w-4 md:h-4 rounded-full transition-all duration-200 hover:scale-130 cursor-pointer relative ${t.id === currentTheme.id ? 'ring-2 ring-white scale-125' : 'opacity-80 hover:opacity-100'}`;
+        btn.style.backgroundColor = t.primary;
+        btn.style.boxShadow = `0 0 6px rgba(${t.rgb}, 0.6)`;
+        btn.addEventListener('click', () => applyTheme(t.id));
+        container.appendChild(btn);
+      });
+    }
+
+    // Initialize Theme Picker
+    initThemePicker();
+
+    // ==========================================
+    // 1. STATE & PRESETS
+    // ==========================================
+    const TRACK_PRESETS = [
+      {
+        id: '01',
+        title: 'DESIGN',
+        category: 'OUR VERSION • EXPERIENCE 01',
+        artist: 'IconiWave Sound Lab',
+        description: 'Our audio engine crafts a modern and soothing resonance, creating the key to deep immersion, ambient mindfulness, and emotional focus.',
+        artwork: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=900&q=80',
+        synthScale: [220, 261.63, 329.63, 392.00, 440.00, 523.25], // A minor pentatonic / ambient
+        bpm: 65,
+        chordRoot: 'Am9'
+      },
+      {
+        id: '02',
+        title: 'NEPTUNE',
+        category: 'ATMOSPHERE • EXPERIENCE 02',
+        artist: 'Solaris Synthetics',
+        description: 'Sub-aquatic bass textures intertwined with celestial overtone pads, invoking the vast solitude of deep blue planetary oceans.',
+        artwork: 'https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=900&q=80',
+        synthScale: [174.61, 220.00, 261.63, 349.23, 392.00, 523.25], // Fmaj7 / Lydian
+        bpm: 54,
+        chordRoot: 'Fmaj7#11'
+      },
+      {
+        id: '03',
+        title: 'ETHEREAL',
+        category: 'HARMONICS • EXPERIENCE 03',
+        artist: 'Chrono Sculptor',
+        description: 'Warm analog warmth and gentle vintage tape flutter, radiating tranquil waves of harmonic meditation and timeless elegance.',
+        artwork: 'https://images.unsplash.com/photo-1582555172866-f73bb12a2ab3?auto=format&fit=crop&w=900&q=80',
+        synthScale: [196.00, 246.94, 293.66, 392.00, 493.88, 587.33], // G major 9
+        bpm: 72,
+        chordRoot: 'Gmaj9'
+      }
+    ];
+
+    let currentTrackIndex = 0;
+    let isPlaying = false;
+    let isCustomAudio = false;
+    let isLofiEnabled = false;
+    let visualizerModeIndex = 0; // 0: Smooth Wave, 1: Minimal Bars, 2: Circular Aura
+    const VISUALIZER_MODES = ['Smooth Wave', 'Minimal Bars', 'Pulse Ribbon'];
+
+    // ==========================================
+    // 2. WEB AUDIO API & GENERATIVE SYNTH ENGINE
+    // ==========================================
+    let audioCtx = null;
+    let analyserNode = null;
+    let masterGain = null;
+    let lofiFilterNode = null;
+    let customAudioElement = null;
+    let customAudioSource = null;
+    let synthTimer = null;
+    let synthBassOsc = null;
+    let synthBassGain = null;
+
+    function initAudioContext() {
+      if (!audioCtx) {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        audioCtx = new AudioContextClass();
+
+        // Analyser Node (placed BEFORE masterGain to decouple visualizer from volume)
+        analyserNode = audioCtx.createAnalyser();
+        analyserNode.fftSize = 512;
+        analyserNode.smoothingTimeConstant = 0.76;
+
+        // Master Gain (Controls output volume only)
+        masterGain = audioCtx.createGain();
+        masterGain.gain.setValueAtTime(parseFloat(document.getElementById('volumeSlider').value), audioCtx.currentTime);
+
+        // Lo-fi Biquad Filter (Lowpass)
+        lofiFilterNode = audioCtx.createBiquadFilter();
+        lofiFilterNode.type = 'lowpass';
+        lofiFilterNode.frequency.setValueAtTime(20000, audioCtx.currentTime); // Default wide open
+
+        // Connect chain: Sources -> lofiFilter -> analyserNode -> masterGain -> destination
+        lofiFilterNode.connect(analyserNode);
+        analyserNode.connect(masterGain);
+        masterGain.connect(audioCtx.destination);
+      }
+
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    // Generative Ambient Synth Voice
+    function triggerAmbientSynthVoice() {
+      if (!isPlaying || isCustomAudio || !audioCtx) return;
+
+      const track = TRACK_PRESETS[currentTrackIndex];
+      const scale = track.synthScale;
+      const freq1 = scale[Math.floor(Math.random() * scale.length)];
+      const freq2 = scale[Math.floor(Math.random() * scale.length)] * 1.5;
+
+      const now = audioCtx.currentTime;
+      const duration = 4.5 + Math.random() * 3;
+
+      // Polyphonic Pad Oscillator 1 (Warm Triangle)
+      const osc1 = audioCtx.createOscillator();
+      const gain1 = audioCtx.createGain();
+      osc1.type = 'triangle';
+      osc1.frequency.setValueAtTime(freq1, now);
+      // Detune slightly for lush chorus
+      osc1.detune.setValueAtTime((Math.random() - 0.5) * 15, now);
+
+      // Envelope ADSR
+      gain1.gain.setValueAtTime(0.001, now);
+      gain1.gain.exponentialRampToValueAtTime(0.08, now + 1.8);
+      gain1.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+
+      osc1.connect(gain1);
+      gain1.connect(lofiFilterNode);
+
+      osc1.start(now);
+      osc1.stop(now + duration + 0.1);
+
+      // Polyphonic Pad Oscillator 2 (Sine Overtone)
+      const osc2 = audioCtx.createOscillator();
+      const gain2 = audioCtx.createGain();
+      osc2.type = 'sine';
+      osc2.frequency.setValueAtTime(freq2, now);
+      osc2.detune.setValueAtTime((Math.random() - 0.5) * 20, now);
+
+      gain2.gain.setValueAtTime(0.001, now);
+      gain2.gain.exponentialRampToValueAtTime(0.04, now + 2.0);
+      gain2.gain.exponentialRampToValueAtTime(0.0001, now + duration * 1.2);
+
+      osc2.connect(gain2);
+      gain2.connect(lofiFilterNode);
+
+      osc2.start(now);
+      osc2.stop(now + duration * 1.2 + 0.1);
+
+      // Trigger next chord slice based on BPM
+      const intervalMs = (60 / track.bpm) * 1500 + Math.random() * 800;
+      synthTimer = setTimeout(triggerAmbientSynthVoice, intervalMs);
+    }
+
+    // Deep Sustained Sub-Bass Drone
+    function startSubBassDrone() {
+      if (!audioCtx || isCustomAudio) return;
+      stopSubBassDrone();
+
+      const track = TRACK_PRESETS[currentTrackIndex];
+      const baseFreq = track.synthScale[0] / 2; // Sub octave
+
+      synthBassOsc = audioCtx.createOscillator();
+      synthBassGain = audioCtx.createGain();
+
+      synthBassOsc.type = 'sine';
+      synthBassOsc.frequency.setValueAtTime(baseFreq, audioCtx.currentTime);
+
+      synthBassGain.gain.setValueAtTime(0.001, audioCtx.currentTime);
+      synthBassGain.gain.linearRampToValueAtTime(0.12, audioCtx.currentTime + 2.5);
+
+      synthBassOsc.connect(synthBassGain);
+      synthBassGain.connect(lofiFilterNode);
+
+      synthBassOsc.start();
+    }
+
+    function stopSubBassDrone() {
+      if (synthBassOsc) {
+        try {
+          synthBassGain.gain.linearRampToValueAtTime(0.0001, audioCtx.currentTime + 0.5);
+          setTimeout(() => {
+            if (synthBassOsc) {
+              synthBassOsc.stop();
+              synthBassOsc.disconnect();
+              synthBassOsc = null;
+            }
+          }, 600);
+        } catch (e) {
+          synthBassOsc = null;
+        }
+      }
+    }
+
+    // Timeline state for synth presets
+    let synthTrackDuration = 180; // 3 minutes virtual track for each preset
+    let synthCurrentTime = 0;
+    let synthClockInterval = null;
+
+    function formatTime(seconds) {
+      if (isNaN(seconds) || seconds < 0) return '00:00';
+      const mins = Math.floor(seconds / 60);
+      const secs = Math.floor(seconds % 60).toString().padStart(2, '0');
+      return `${mins}:${secs}`;
+    }
+
+    function updateTimelineUI(currentTime, duration) {
+      if (isDraggingScrubber) return;
+      const validDur = duration && duration > 0 ? duration : synthTrackDuration;
+      const validCur = Math.min(currentTime || 0, validDur);
+      const progressPct = (validCur / validDur) * 100;
+
+      const progressBarFill = document.getElementById('progressBarFill');
+      const progressBarThumb = document.getElementById('progressBarThumb');
+      const currentTimeDisplay = document.getElementById('currentTimeDisplay');
+      const durationDisplay = document.getElementById('durationDisplay');
+
+      if (progressBarFill) progressBarFill.style.width = `${progressPct}%`;
+      if (progressBarThumb) progressBarThumb.style.left = `${progressPct}%`;
+      if (currentTimeDisplay) currentTimeDisplay.textContent = formatTime(validCur);
+      if (durationDisplay) durationDisplay.textContent = formatTime(validDur);
+    }
+
+    function startAudioPlayback() {
+      initAudioContext();
+      isPlaying = true;
+      updatePlayButtonUI(true);
+
+      if (isCustomAudio && customAudioElement) {
+        customAudioElement.play();
+        document.getElementById('engineStatusBadge').textContent = 'Custom Audio Playing';
+      } else {
+        triggerAmbientSynthVoice();
+        startSubBassDrone();
+        document.getElementById('engineStatusBadge').textContent = 'Generative Synth Active';
+
+        // Start virtual clock for synth
+        if (synthClockInterval) clearInterval(synthClockInterval);
+        synthClockInterval = setInterval(() => {
+          if (!isPlaying || isCustomAudio) return;
+          synthCurrentTime += 0.5;
+          if (synthCurrentTime >= synthTrackDuration) {
+            synthCurrentTime = 0;
+            setTrackPreset(currentTrackIndex + 1);
+          }
+          updateTimelineUI(synthCurrentTime, synthTrackDuration);
+        }, 500);
+      }
+    }
+
+    function pauseAudioPlayback() {
+      isPlaying = false;
+      updatePlayButtonUI(false);
+
+      if (synthTimer) {
+        clearTimeout(synthTimer);
+        synthTimer = null;
+      }
+      if (synthClockInterval) {
+        clearInterval(synthClockInterval);
+        synthClockInterval = null;
+      }
+      stopSubBassDrone();
+
+      if (isCustomAudio && customAudioElement) {
+        customAudioElement.pause();
+      }
+      document.getElementById('engineStatusBadge').textContent = 'Playback Paused';
+    }
+
+    function togglePlay() {
+      if (isPlaying) {
+        pauseAudioPlayback();
+      } else {
+        startAudioPlayback();
+      }
+    }
+
+    function updatePlayButtonUI(playing) {
+      const playIconContainer = document.getElementById('playIconContainer');
+      const playButtonText = document.getElementById('playButtonText');
+      const playRing = document.getElementById('playRing');
+      const bigCircle = document.getElementById('bigCircle');
+
+      if (playing) {
+        playIconContainer.innerHTML = '<i data-lucide="pause" class="w-5 h-5 fill-current"></i>';
+        playButtonText.textContent = 'Pause Experience';
+        playRing.classList.remove('opacity-0');
+        playRing.classList.add('opacity-100');
+        bigCircle.style.transform = 'scale(1.05)';
+      } else {
+        playIconContainer.innerHTML = '<i data-lucide="play" class="w-5 h-5 ml-0.5 fill-current"></i>';
+        playButtonText.textContent = 'Play Experience';
+        playRing.classList.remove('opacity-100');
+        playRing.classList.add('opacity-0');
+        bigCircle.style.transform = 'scale(1)';
+      }
+      lucide.createIcons();
+    }
+
+    // ==========================================
+    // 3. CANVAS REAL-TIME VISUALIZER
+    // ==========================================
+    const canvas = document.getElementById('waveformCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // Handle high-DPI displays
+    function resizeCanvas() {
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = rect.width * window.devicePixelRatio || 700;
+      canvas.height = rect.height * window.devicePixelRatio || 120;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    let visualizerAngle = 0;
+    
+    // Persistent smoothing buffers for Pulse Ribbon (Lerp Dampening)
+    let ribbonSmoothedEnergy = 0;
+    let ribbonSmoothedBass = 0;
+    let ribbonSmoothedFreqs = new Float32Array(64);
+
+    function renderVisualizer() {
+      requestAnimationFrame(renderVisualizer);
+
+      const width = canvas.width;
+      const height = canvas.height;
+
+      // Clear canvas with smooth visualizer backdrop
+      ctx.clearRect(0, 0, width, height);
+
+      let bufferLength = analyserNode ? analyserNode.frequencyBinCount : 128;
+      let dataArray = new Uint8Array(bufferLength);
+      let isReceivingSignal = false;
+      let overallEnergy = 0;
+
+      if (analyserNode && isPlaying) {
+        analyserNode.getByteFrequencyData(dataArray);
+        let sum = 0;
+        for (let i = 0; i < Math.min(bufferLength, 64); i++) {
+          sum += dataArray[i];
+          if (dataArray[i] > 3) isReceivingSignal = true;
+        }
+        overallEnergy = sum / (Math.min(bufferLength, 64) * 255);
+      }
+
+      // Modulate ambient hero background glow smoothly with audio energy (Apple Music vibe)
+      const ambientHeroGlow = document.getElementById('ambientHeroGlow');
+      if (ambientHeroGlow) {
+        if (isReceivingSignal) {
+          const bassBoost = (dataArray[2] || 0) / 255;
+          const targetScale = 1.0 + (overallEnergy * 0.14) + (bassBoost * 0.10);
+          const targetOpacity = 0.36 + (overallEnergy * 0.18);
+          ambientHeroGlow.style.transform = `translate3d(0, 0, 0) scale(${targetScale.toFixed(3)})`;
+          ambientHeroGlow.style.opacity = targetOpacity.toFixed(2);
+        } else {
+          ambientHeroGlow.style.transform = 'translate3d(0, 0, 0) scale(1)';
+          ambientHeroGlow.style.opacity = '0.35';
+        }
+      }
+
+      // Smooth time angle increment for ambient physics
+      visualizerAngle += isReceivingSignal ? (0.04 + overallEnergy * 0.05) : 0.025;
+
+      if (visualizerModeIndex === 0) {
+        // MODE 0: Enhanced Smooth Liquid Waveform (Double-Pass Neon Bloom + Crisp Core)
+        const points = 36;
+        const sliceWidth = width / (points - 1);
+        const wavePoints = [];
+
+        for (let i = 0; i < points; i++) {
+          const x = i * sliceWidth;
+          let audioVal = 0;
+          if (isReceivingSignal) {
+            // Sample frequency band with gentle curvature & boost
+            const freqIdx = Math.floor((i / points) * 48);
+            const rawVal = dataArray[freqIdx] / 255;
+            // Enhanced dynamic amplitude scaling (power curve for punchy reactivity)
+            const boostedVal = Math.pow(rawVal, 0.82) * 1.35;
+            audioVal = boostedVal * (height * 0.44);
+          } else {
+            // Idle ambient breathing wave
+            audioVal = Math.sin(visualizerAngle + i * 0.35) * (height * 0.14);
+          }
+
+          const ripple = Math.sin(visualizerAngle * 1.8 + i * 0.45) * audioVal;
+          const y = height / 2 + ripple;
+          wavePoints.push({ x, y });
+        }
+
+        // Draw soft ambient gradient fill under wave
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(0, height);
+        ctx.lineTo(wavePoints[0].x, wavePoints[0].y);
+        for (let i = 1; i < wavePoints.length; i++) {
+          const xc = (wavePoints[i - 1].x + wavePoints[i].x) / 2;
+          const yc = (wavePoints[i - 1].y + wavePoints[i].y) / 2;
+          ctx.quadraticCurveTo(wavePoints[i - 1].x, wavePoints[i - 1].y, xc, yc);
+        }
+        ctx.lineTo(width, wavePoints[wavePoints.length - 1].y);
+        ctx.lineTo(width, height);
+        ctx.closePath();
+
+        const fillGrad = ctx.createLinearGradient(0, height * 0.15, 0, height);
+        fillGrad.addColorStop(0, `rgba(${currentTheme.rgb}, 0.55)`);
+        fillGrad.addColorStop(0.5, `rgba(${currentTheme.glowRgb}, 0.22)`);
+        fillGrad.addColorStop(1, 'rgba(27, 25, 26, 0)');
+        ctx.fillStyle = fillGrad;
+        ctx.fill();
+        ctx.restore();
+
+        // Pass 1: Wide Radiant Neon Bloom Aura (Bloom Pass)
+        ctx.save();
+        ctx.beginPath();
+        ctx.lineWidth = 7 * window.devicePixelRatio;
+        ctx.shadowBlur = 38 * window.devicePixelRatio;
+        ctx.shadowColor = `rgba(${currentTheme.glowRgb}, 0.95)`;
+        ctx.strokeStyle = `rgba(${currentTheme.glowRgb}, 0.75)`;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+
+        ctx.moveTo(wavePoints[0].x, wavePoints[0].y);
+        for (let i = 1; i < wavePoints.length; i++) {
+          const xc = (wavePoints[i - 1].x + wavePoints[i].x) / 2;
+          const yc = (wavePoints[i - 1].y + wavePoints[i].y) / 2;
+          ctx.quadraticCurveTo(wavePoints[i - 1].x, wavePoints[i - 1].y, xc, yc);
+        }
+        ctx.lineTo(wavePoints[wavePoints.length - 1].x, wavePoints[wavePoints.length - 1].y);
+        ctx.stroke();
+        ctx.restore();
+
+        // Pass 2: Crisp Core & Glowing Center Stroke (Core Pass)
+        ctx.save();
+        ctx.beginPath();
+        ctx.lineWidth = 2.8 * window.devicePixelRatio;
+        ctx.shadowBlur = 14 * window.devicePixelRatio;
+        ctx.shadowColor = '#FFFFFF';
+
+        const lineGradient = ctx.createLinearGradient(0, 0, width, 0);
+        lineGradient.addColorStop(0, currentTheme.primary);
+        lineGradient.addColorStop(0.3, '#FFFFFF');
+        lineGradient.addColorStop(0.7, currentTheme.glow);
+        lineGradient.addColorStop(1, currentTheme.primary);
+        ctx.strokeStyle = lineGradient;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+
+        ctx.moveTo(wavePoints[0].x, wavePoints[0].y);
+        for (let i = 1; i < wavePoints.length; i++) {
+          const xc = (wavePoints[i - 1].x + wavePoints[i].x) / 2;
+          const yc = (wavePoints[i - 1].y + wavePoints[i].y) / 2;
+          ctx.quadraticCurveTo(wavePoints[i - 1].x, wavePoints[i - 1].y, xc, yc);
+        }
+        ctx.lineTo(wavePoints[wavePoints.length - 1].x, wavePoints[wavePoints.length - 1].y);
+        ctx.stroke();
+        ctx.restore();
+
+        // Secondary subtle counter-wave with ethereal white glow
+        ctx.save();
+        ctx.beginPath();
+        ctx.lineWidth = 1.6 * window.devicePixelRatio;
+        ctx.shadowBlur = 10 * window.devicePixelRatio;
+        ctx.shadowColor = 'rgba(233, 228, 224, 0.6)';
+        ctx.strokeStyle = 'rgba(233, 228, 224, 0.55)';
+        for (let i = 0; i < points; i++) {
+          const x = i * sliceWidth;
+          let audioVal = isReceivingSignal ? (dataArray[(i * 2) % 36] / 255) * (height * 0.28) : Math.cos(visualizerAngle + i * 0.4) * (height * 0.09);
+          const y = height / 2 - Math.cos(visualizerAngle * 1.4 + i * 0.4) * audioVal;
+          if (i === 0) ctx.moveTo(x, y);
+          else {
+            const prevX = (i - 1) * sliceWidth;
+            const prevY = height / 2 - Math.cos(visualizerAngle * 1.4 + (i - 1) * 0.4) * (isReceivingSignal ? (dataArray[((i - 1) * 2) % 36] / 255) * (height * 0.28) : Math.cos(visualizerAngle + (i - 1) * 0.4) * (height * 0.09));
+            const xc = (prevX + x) / 2;
+            const yc = (prevY + y) / 2;
+            ctx.quadraticCurveTo(prevX, prevY, xc, yc);
+          }
+        }
+        ctx.stroke();
+        ctx.restore();
+
+      } else if (visualizerModeIndex === 1) {
+        // MODE 1: Minimalist Frequency Bars (High Dynamic Range + Radiant Neon Bloom)
+        const barCount = 48;
+        const barWidth = (width / barCount) * 0.62;
+        const gap = (width / barCount) * 0.38;
+
+        ctx.save();
+        ctx.shadowBlur = 26 * window.devicePixelRatio;
+        ctx.shadowColor = `rgba(${currentTheme.glowRgb}, 0.85)`;
+
+        for (let i = 0; i < barCount; i++) {
+          let val = 0;
+          if (isReceivingSignal) {
+            const idx = Math.floor((i / barCount) * 54);
+            const rawVal = dataArray[idx] / 255;
+            // Dynamic non-linear scaling for punchy bars
+            val = Math.pow(rawVal, 0.78) * (height * 0.88);
+          } else {
+            val = (Math.sin(visualizerAngle * 2.2 + i * 0.28) * 0.5 + 0.5) * (height * 0.28) + 6;
+          }
+
+          val = Math.max(5, val);
+          const x = i * (barWidth + gap) + gap / 2;
+          const y = (height - val) / 2;
+
+          // Glowing gradient bar
+          const barGrad = ctx.createLinearGradient(0, y, 0, y + val);
+          if (i % 2 === 0) {
+            barGrad.addColorStop(0, '#FFFFFF');
+            barGrad.addColorStop(0.3, currentTheme.glow);
+            barGrad.addColorStop(0.7, currentTheme.light);
+            barGrad.addColorStop(1, currentTheme.primary);
+          } else {
+            barGrad.addColorStop(0, '#FFFFFF');
+            barGrad.addColorStop(0.4, '#E9E4E0');
+            barGrad.addColorStop(0.8, '#A59F9A');
+            barGrad.addColorStop(1, '#353032');
+          }
+
+          ctx.fillStyle = barGrad;
+          ctx.beginPath();
+          ctx.roundRect(x, y, barWidth, val, 3.5);
+          ctx.fill();
+        }
+        ctx.restore();
+
+      } else {
+        // MODE 2: Pulse Ribbon (Attack & Decay Envelope + Spatial Smoothing + Double-Pass Neon Ribbon Bloom)
+        const slices = 52;
+        const targetBass = isReceivingSignal ? (((dataArray[1] || 0) + (dataArray[2] || 0) + (dataArray[3] || 0)) / (3 * 255)) : 0;
+        const targetEnergy = isReceivingSignal ? Math.min(1, Math.max(0, (overallEnergy * 0.65 + targetBass * 0.85))) : 0;
+
+        // 1. Attack & Decay Envelope: Fast/Smooth Rise (Attack = 0.20) and Slow/Lingering Release (Decay = 0.05)
+        const energyAttack = 0.20;
+        const energyDecay = 0.052;
+        if (targetEnergy > ribbonSmoothedEnergy) {
+          ribbonSmoothedEnergy += (targetEnergy - ribbonSmoothedEnergy) * energyAttack;
+        } else {
+          ribbonSmoothedEnergy += (targetEnergy - ribbonSmoothedEnergy) * energyDecay;
+        }
+
+        if (targetBass > ribbonSmoothedBass) {
+          ribbonSmoothedBass += (targetBass - ribbonSmoothedBass) * energyAttack;
+        } else {
+          ribbonSmoothedBass += (targetBass - ribbonSmoothedBass) * energyDecay;
+        }
+
+        const energyFactor = ribbonSmoothedEnergy;
+
+        // 2. Frequency Buffer Attack & Decay Update
+        const freqAttack = 0.22;
+        const freqDecay = 0.058;
+        for (let k = 0; k < 64; k++) {
+          const rawTarget = isReceivingSignal ? ((dataArray[k] || 0) / 255) : 0;
+          if (rawTarget > ribbonSmoothedFreqs[k]) {
+            ribbonSmoothedFreqs[k] += (rawTarget - ribbonSmoothedFreqs[k]) * freqAttack;
+          } else {
+            ribbonSmoothedFreqs[k] += (rawTarget - ribbonSmoothedFreqs[k]) * freqDecay;
+          }
+        }
+
+        // Safe margin ceiling to prevent clipping canvas edges
+        const safeMargin = 10 * window.devicePixelRatio;
+        const maxAmplitude = height * 0.38;
+
+        for (let j = 0; j < 3; j++) {
+          // Generate smooth ribbon points with Spatial Smoothing & continuous blending
+          const ribbonPoints = [];
+          const baseOffset = (j - 1) * (6 + energyFactor * 14); // Clean 6px parallel spacing when idle, expands smoothly on beat
+
+          for (let i = 0; i < slices; i++) {
+            const x = (i / (slices - 1)) * width;
+            
+            // Idle state: Very gentle, long-wavelength, non-twisting fluid drift
+            const idleDrift = Math.sin(visualizerAngle * 0.6 + i * 0.07) * (height * 0.03);
+
+            // 3. Spatial Smoothing: 3-point Gaussian kernel across neighboring frequency bins
+            const freqIdx = Math.floor((i / slices) * 36) + j * 2;
+            const prevFreq = ribbonSmoothedFreqs[Math.max(0, freqIdx - 1)] || 0;
+            const currFreq = ribbonSmoothedFreqs[freqIdx] || 0;
+            const nextFreq = ribbonSmoothedFreqs[Math.min(63, freqIdx + 1)] || 0;
+            const spatialFreq = (prevFreq * 0.25 + currFreq * 0.50 + nextFreq * 0.25);
+
+            // 4. Continuous mathematical wave without hard if-else switching
+            const boostedFreq = Math.min(maxAmplitude, Math.pow(spatialFreq, 0.85) * (height * 0.44));
+            const dynamicBounce = Math.sin(visualizerAngle * (1.05 + j * 0.35 * energyFactor) + i * (0.08 + 0.11 * energyFactor)) * boostedFreq;
+
+            // Seamless slope transition between parallel idle and dynamic beat motion
+            const rawY = height / 2 + baseOffset + (idleDrift * (1 - energyFactor * 0.6)) + (dynamicBounce * energyFactor);
+            
+            // Safe clamping ceiling
+            const clampedY = Math.max(safeMargin, Math.min(height - safeMargin, rawY));
+            ribbonPoints.push({ x, y: clampedY });
+          }
+
+          // Function to trace Catmull-Rom spline
+          const traceSplinePath = () => {
+            ctx.beginPath();
+            ctx.moveTo(ribbonPoints[0].x, ribbonPoints[0].y);
+            for (let i = 0; i < ribbonPoints.length - 1; i++) {
+              const p0 = ribbonPoints[Math.max(0, i - 1)];
+              const p1 = ribbonPoints[i];
+              const p2 = ribbonPoints[i + 1];
+              const p3 = ribbonPoints[Math.min(ribbonPoints.length - 1, i + 2)];
+
+              // Catmull-Rom control points
+              const cp1x = p1.x + (p2.x - p0.x) / 6;
+              const cp1y = p1.y + (p2.y - p0.y) / 6;
+              const cp2x = p2.x - (p3.x - p1.x) / 6;
+              const cp2y = p2.y - (p3.y - p1.y) / 6;
+
+              ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, p2.x, p2.y);
+            }
+          };
+
+          // PASS 1: Broad Radiant Bloom Stroke
+          ctx.save();
+          ctx.lineCap = 'round';
+          ctx.lineJoin = 'round';
+          traceSplinePath();
+
+          if (j === 0) {
+            ctx.strokeStyle = `rgba(${currentTheme.glowRgb}, 0.85)`;
+            ctx.lineWidth = (4.5 + energyFactor * 3.5) * window.devicePixelRatio;
+            ctx.shadowBlur = (15 + energyFactor * 42) * window.devicePixelRatio;
+            ctx.shadowColor = `rgba(${currentTheme.glowRgb}, ${(0.55 + energyFactor * 0.45).toFixed(2)})`;
+          } else if (j === 1) {
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.75)';
+            ctx.lineWidth = (3.5 + energyFactor * 2.8) * window.devicePixelRatio;
+            ctx.shadowBlur = (12 + energyFactor * 28) * window.devicePixelRatio;
+            ctx.shadowColor = `rgba(233, 228, 224, ${(0.45 + energyFactor * 0.45).toFixed(2)})`;
+          } else {
+            ctx.strokeStyle = `rgba(${currentTheme.rgb}, 0.75)`;
+            ctx.lineWidth = (3.0 + energyFactor * 2.5) * window.devicePixelRatio;
+            ctx.shadowBlur = (10 + energyFactor * 32) * window.devicePixelRatio;
+            ctx.shadowColor = `rgba(${currentTheme.glowRgb}, ${(0.40 + energyFactor * 0.50).toFixed(2)})`;
+          }
+          ctx.stroke();
+          ctx.restore();
+
+          // PASS 2: Crisp Glowing Core Stroke
+          ctx.save();
+          ctx.lineCap = 'round';
+          ctx.lineJoin = 'round';
+          traceSplinePath();
+
+          if (j === 0) {
+            ctx.strokeStyle = currentTheme.light;
+            ctx.lineWidth = (1.8 + energyFactor * 1.2) * window.devicePixelRatio;
+            ctx.shadowBlur = 8 * window.devicePixelRatio;
+            ctx.shadowColor = '#FFFFFF';
+          } else if (j === 1) {
+            ctx.strokeStyle = '#FFFFFF';
+            ctx.lineWidth = (1.5 + energyFactor * 1.0) * window.devicePixelRatio;
+            ctx.shadowBlur = 10 * window.devicePixelRatio;
+            ctx.shadowColor = '#FFFFFF';
+          } else {
+            ctx.strokeStyle = currentTheme.glow;
+            ctx.lineWidth = (1.4 + energyFactor * 1.0) * window.devicePixelRatio;
+            ctx.shadowBlur = 6 * window.devicePixelRatio;
+            ctx.shadowColor = '#FFFFFF';
+          }
+          ctx.stroke();
+          ctx.restore();
+        }
+      }
+    }
+    renderVisualizer();
+
+    // ==========================================
+    // 4. UI INTERACTIVITY & PRESET MANAGEMENT
+    // ==========================================
+    function setTrackPreset(index) {
+      currentTrackIndex = (index + TRACK_PRESETS.length) % TRACK_PRESETS.length;
+      const track = TRACK_PRESETS[currentTrackIndex];
+
+      // Update Typography
+      document.getElementById('trackTitle').textContent = track.title;
+      document.getElementById('trackCategory').textContent = track.category;
+      document.getElementById('trackArtist').textContent = track.artist;
+      document.getElementById('trackDescription').textContent = track.description;
+
+      // Update Artwork & Duotone transition
+      const img = document.getElementById('artworkImage');
+      img.style.opacity = '0';
+      setTimeout(() => {
+        img.src = track.artwork;
+        img.style.opacity = '1';
+      }, 250);
+
+      // Update Indicators
+      document.getElementById('presetIndicator').textContent = `${track.id} / 03`;
+      document.getElementById('footerCurrentIndex').textContent = track.id;
+
+      // Reset Timeline for Synth Preset
+      if (!isCustomAudio) {
+        synthCurrentTime = 0;
+        updateTimelineUI(0, synthTrackDuration);
+      }
+
+      // If playing and using generative synth, smoothly re-trigger
+      if (isPlaying && !isCustomAudio) {
+        if (synthTimer) clearTimeout(synthTimer);
+        startSubBassDrone();
+        triggerAmbientSynthVoice();
+      }
+    }
+
+    // Next / Prev Buttons
+    document.getElementById('nextTrackBtn').addEventListener('click', () => {
+      setTrackPreset(currentTrackIndex + 1);
+    });
+    document.getElementById('prevTrackBtn').addEventListener('click', () => {
+      setTrackPreset(currentTrackIndex - 1);
+    });
+
+    // Play / Pause Main Button
+    document.getElementById('mainPlayBtn').addEventListener('click', togglePlay);
+
+    // Visualizer Style Switcher
+    document.getElementById('toggleWaveStyle').addEventListener('click', () => {
+      visualizerModeIndex = (visualizerModeIndex + 1) % VISUALIZER_MODES.length;
+      const modeName = VISUALIZER_MODES[visualizerModeIndex];
+      document.getElementById('waveStyleName').textContent = modeName;
+      document.getElementById('canvasModeLabel').textContent = `Real-time ${modeName}`;
+    });
+
+    // Canvas click also switches visualizer style
+    canvas.addEventListener('click', () => {
+      document.getElementById('toggleWaveStyle').click();
+    });
+
+    // Volume Slider
+    const volumeSlider = document.getElementById('volumeSlider');
+    const volumeIcon = document.getElementById('volumeIcon');
+    volumeSlider.addEventListener('input', (e) => {
+      const val = parseFloat(e.target.value);
+      if (masterGain && audioCtx) {
+        masterGain.gain.setValueAtTime(val, audioCtx.currentTime);
+      }
+      if (val === 0) {
+        volumeIcon.setAttribute('data-lucide', 'volume-x');
+      } else if (val < 0.5) {
+        volumeIcon.setAttribute('data-lucide', 'volume-1');
+      } else {
+        volumeIcon.setAttribute('data-lucide', 'volume-2');
+      }
+      lucide.createIcons();
+    });
+
+    // Mute button toggle
+    document.getElementById('muteBtn').addEventListener('click', () => {
+      if (volumeSlider.value > 0) {
+        volumeSlider.dataset.prevVal = volumeSlider.value;
+        volumeSlider.value = 0;
+      } else {
+        volumeSlider.value = volumeSlider.dataset.prevVal || 0.75;
+      }
+      volumeSlider.dispatchEvent(new Event('input'));
+    });
+
+    // Lo-Fi FX Mode
+    const fxLoFiBtn = document.getElementById('fxLoFiBtn');
+    const fxStatus = document.getElementById('fxStatus');
+    fxLoFiBtn.addEventListener('click', () => {
+      initAudioContext();
+      isLofiEnabled = !isLofiEnabled;
+      if (isLofiEnabled) {
+        fxStatus.textContent = 'ON';
+        fxStatus.className = 'text-green-400 font-mono font-bold';
+        lofiFilterNode.frequency.setTargetAtTime(1400, audioCtx.currentTime, 0.1);
+      } else {
+        fxStatus.textContent = 'OFF';
+        fxStatus.className = 'font-mono theme-transition';
+        fxStatus.style.color = 'var(--accent-primary)';
+        lofiFilterNode.frequency.setTargetAtTime(20000, audioCtx.currentTime, 0.1);
+      }
+    });
+
+    // ==========================================
+    // 5. CUSTOM AUDIO FILE UPLOAD
+    // ==========================================
+    const audioFileInput = document.getElementById('audioFileInput');
+    audioFileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      initAudioContext();
+
+      if (customAudioElement) {
+        customAudioElement.pause();
+        customAudioElement = null;
+      }
+
+      const fileURL = URL.createObjectURL(file);
+      customAudioElement = new Audio(fileURL);
+      customAudioElement.loop = true;
+
+      // Connect HTML5 audio element to Web Audio graph
+      customAudioSource = audioCtx.createMediaElementSource(customAudioElement);
+      customAudioSource.connect(lofiFilterNode);
+
+      isCustomAudio = true;
+      document.getElementById('trackTitle').textContent = file.name.replace(/\.[^/.]+$/, '').toUpperCase();
+      document.getElementById('trackArtist').textContent = 'User Uploaded Audio';
+      document.getElementById('trackDescription').textContent = `Now streaming "${file.name}" with real-time waveform processing.`;
+      document.getElementById('trackCategory').textContent = 'USER FILE • EXTERNAL';
+
+      // Duration & time tracking
+      customAudioElement.addEventListener('loadedmetadata', () => {
+        updateTimelineUI(customAudioElement.currentTime, customAudioElement.duration);
+      });
+
+      customAudioElement.addEventListener('timeupdate', () => {
+        if (!isDraggingScrubber && customAudioElement.duration) {
+          updateTimelineUI(customAudioElement.currentTime, customAudioElement.duration);
+        }
+      });
+
+      startAudioPlayback();
+    });
+
+    // ==========================================
+    // 6. CUSTOM ARTWORK UPLOAD & RANDOM PRESET
+    // ==========================================
+    const imageFileInput = document.getElementById('imageFileInput');
+    imageFileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const url = URL.createObjectURL(file);
+        document.getElementById('artworkImage').src = url;
+      }
+    });
+
+    const ARTWORK_COLLECTION = [
+      'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=900&q=80',
+      'https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=900&q=80',
+      'https://images.unsplash.com/photo-1582555172866-f73bb12a2ab3?auto=format&fit=crop&w=900&q=80',
+      'https://images.unsplash.com/photo-1561214115-f2f134cc4912?auto=format&fit=crop&w=900&q=80',
+      'https://images.unsplash.com/photo-1578925518470-4def7a0f08bb?auto=format&fit=crop&w=900&q=80'
+    ];
+
+    document.getElementById('changeArtworkPresetBtn').addEventListener('click', () => {
+      const randIdx = Math.floor(Math.random() * ARTWORK_COLLECTION.length);
+      const img = document.getElementById('artworkImage');
+      img.style.opacity = '0';
+      setTimeout(() => {
+        img.src = ARTWORK_COLLECTION[randIdx];
+        img.style.opacity = '1';
+      }, 200);
+    });
+
+    // ==========================================
+    // 7. TIMELINE SEEK & SCRUBBING ENGINE
+    // ==========================================
+    const progressBarContainer = document.getElementById('progressBarContainer');
+    const progressBarFill = document.getElementById('progressBarFill');
+    const progressBarThumb = document.getElementById('progressBarThumb');
+    const progressHoverFill = document.getElementById('progressHoverFill');
+    const progressTooltip = document.getElementById('progressTooltip');
+    const currentTimeDisplay = document.getElementById('currentTimeDisplay');
+    const durationDisplay = document.getElementById('durationDisplay');
+
+    let isDraggingScrubber = false;
+
+    function getTrackDuration() {
+      if (isCustomAudio && customAudioElement && customAudioElement.duration) {
+        return customAudioElement.duration;
+      }
+      return synthTrackDuration;
+    }
+
+    function calculateScrubRatio(clientX) {
+      const rect = progressBarContainer.getBoundingClientRect();
+      const clickX = clientX - rect.left;
+      return Math.max(0, Math.min(1, clickX / rect.width));
+    }
+
+    function applySeek(ratio) {
+      const totalDur = getTrackDuration();
+      const targetTime = ratio * totalDur;
+
+      if (isCustomAudio && customAudioElement && customAudioElement.duration) {
+        customAudioElement.currentTime = targetTime;
+      } else {
+        synthCurrentTime = targetTime;
+      }
+
+      // Update UI displays immediately
+      const pct = ratio * 100;
+      progressBarFill.style.width = `${pct}%`;
+      progressBarThumb.style.left = `${pct}%`;
+      currentTimeDisplay.textContent = formatTime(targetTime);
+      durationDisplay.textContent = formatTime(totalDur);
+    }
+
+    // Mouse Events for Progress Bar
+    progressBarContainer.addEventListener('mousedown', (e) => {
+      isDraggingScrubber = true;
+      const ratio = calculateScrubRatio(e.clientX);
+      applySeek(ratio);
+    });
+
+    progressBarContainer.addEventListener('mousemove', (e) => {
+      const ratio = calculateScrubRatio(e.clientX);
+      const totalDur = getTrackDuration();
+      const hoverTime = ratio * totalDur;
+
+      // Update hover ghost fill and tooltip
+      progressHoverFill.style.width = `${ratio * 100}%`;
+      progressTooltip.style.left = `${ratio * 100}%`;
+      progressTooltip.textContent = formatTime(hoverTime);
+
+      // If actively dragging, seek along with cursor
+      if (isDraggingScrubber) {
+        applySeek(ratio);
+      }
+    });
+
+    progressBarContainer.addEventListener('mouseleave', () => {
+      if (!isDraggingScrubber) {
+        progressHoverFill.style.width = '0%';
+      }
+    });
+
+    // Global window events so dragging continues smoothly even if cursor moves outside bar
+    window.addEventListener('mousemove', (e) => {
+      if (isDraggingScrubber) {
+        const ratio = calculateScrubRatio(e.clientX);
+        applySeek(ratio);
+      }
+    });
+
+    window.addEventListener('mouseup', (e) => {
+      if (isDraggingScrubber) {
+        isDraggingScrubber = false;
+        progressHoverFill.style.width = '0%';
+      }
+    });
+
+    // Touch Support for Mobile / Tablets
+    progressBarContainer.addEventListener('touchstart', (e) => {
+      if (e.touches.length > 0) {
+        isDraggingScrubber = true;
+        const ratio = calculateScrubRatio(e.touches[0].clientX);
+        applySeek(ratio);
+      }
+    }, { passive: true });
+
+    window.addEventListener('touchmove', (e) => {
+      if (isDraggingScrubber && e.touches.length > 0) {
+        const ratio = calculateScrubRatio(e.touches[0].clientX);
+        applySeek(ratio);
+      }
+    }, { passive: true });
+
+    window.addEventListener('touchend', () => {
+      if (isDraggingScrubber) {
+        isDraggingScrubber = false;
+      }
+    });
+
+    // Navigation buttons shortcuts
+    document.getElementById('navNowPlaying').addEventListener('click', () => {
+      togglePlay();
+    });
+    document.getElementById('navVisualizer').addEventListener('click', () => {
+      document.getElementById('toggleWaveStyle').click();
+    });
+    document.getElementById('navSoundFx').addEventListener('click', () => {
+      document.getElementById('fxLoFiBtn').click();
+    });
+    document.getElementById('navPresets').addEventListener('click', () => {
+      document.getElementById('nextTrackBtn').click();
+    });
+
+    // Info Modal
+    const infoModal = document.getElementById('infoModal');
+    document.getElementById('modalInfoBtn').addEventListener('click', () => {
+      infoModal.classList.remove('hidden');
+    });
+    document.getElementById('closeModalBtn').addEventListener('click', () => {
+      infoModal.classList.add('hidden');
+    });
+    document.getElementById('closeModalBtn2').addEventListener('click', () => {
+      infoModal.classList.add('hidden');
+    });
+    infoModal.addEventListener('click', (e) => {
+      if (e.target === infoModal) infoModal.classList.add('hidden');
+    });
+
+    // Global Keybindings (Space to Play/Pause, Arrow keys for tracks)
+    window.addEventListener('keydown', (e) => {
+      if (e.code === 'Space' && e.target.tagName !== 'INPUT') {
+        e.preventDefault();
+        togglePlay();
+      } else if (e.code === 'ArrowRight' && e.target.tagName !== 'INPUT') {
+        setTrackPreset(currentTrackIndex + 1);
+      } else if (e.code === 'ArrowLeft' && e.target.tagName !== 'INPUT') {
+        setTrackPreset(currentTrackIndex - 1);
+      }
+    });
+  </script>
+</body>
+</html>
+
