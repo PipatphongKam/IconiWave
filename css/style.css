@@ -1,0 +1,200 @@
+:root {
+  --accent-primary: #943A1F;
+  --accent-light: #d9532d;
+  --accent-glow: #D15834;
+  --accent-dark: #742C15;
+  --accent-rgb: 148, 58, 31;
+  --accent-glow-rgb: 209, 88, 52;
+}
+
+/* Global smooth color transition */
+.theme-transition {
+  transition: color 0.35s ease, background-color 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #1B191A; }
+::-webkit-scrollbar-thumb { background: #353032; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--accent-primary); }
+
+/* Custom range input */
+input[type="range"] {
+  -webkit-appearance: none;
+  background: #353032;
+  border-radius: 9999px;
+  height: 4px;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  height: 12px;
+  width: 12px;
+  border-radius: 50%;
+  background: #E9E4E0;
+  cursor: pointer;
+  box-shadow: 0 0 8px rgba(var(--accent-rgb), 0.6);
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.3);
+  background: var(--accent-light);
+}
+
+/* Ambient pulse */
+@keyframes slowFloat {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-10px) rotate(1deg); }
+}
+.animate-float {
+  animation: slowFloat 7s ease-in-out infinite;
+}
+
+@keyframes orbPulse {
+  0%, 100% { transform: scale(1); opacity: 0.9; }
+  50% { transform: scale(1.03); opacity: 1; }
+}
+.animate-orb {
+  animation: orbPulse 5s ease-in-out infinite;
+}
+
+/* Ambient Background Keyframes & Glows */
+@keyframes ambientDriftRight {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(-30px, 20px, 0) scale(1.08);
+  }
+}
+
+@keyframes ambientDriftLeft {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(25px, -25px, 0) scale(1.06);
+  }
+}
+
+@keyframes ambientDriftBottom {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(-15px, -20px, 0) scale(1.1);
+  }
+}
+
+.ambient-glow-right {
+  animation: ambientDriftRight 12s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+.ambient-glow-left {
+  animation: ambientDriftLeft 15s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+.ambient-glow-bottom {
+  animation: ambientDriftBottom 10s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+/* ============================================================ */
+/* MARQUEE AUTO-SCROLL SYSTEM (Smooth Fade & Pause Loop)        */
+/* ============================================================ */
+.marquee-container {
+  position: relative;
+  overflow: hidden;
+  white-space: nowrap;
+  mask-image: linear-gradient(90deg, transparent 0%, #000 14px, #000 calc(100% - 14px), transparent 100%);
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 14px, #000 calc(100% - 14px), transparent 100%);
+  transition: mask-image 0.25s ease, -webkit-mask-image 0.25s ease;
+}
+.marquee-container.no-overflow {
+  mask-image: none !important;
+  -webkit-mask-image: none !important;
+}
+.marquee-content {
+  display: inline-block;
+  white-space: nowrap;
+  will-change: transform, opacity;
+  transform: translate3d(0, 0, 0);
+}
+.marquee-active {
+  animation: marqueeFadePauseLoop 10s cubic-bezier(0.4, 0.0, 0.2, 1) infinite;
+}
+.marquee-container:hover .marquee-active {
+  animation-play-state: paused;
+}
+
+/* Sequence: [0%-25% Pause] -> [25%-75% Scroll] -> [75%-85% Fade Out] -> [86% Snap Start] -> [87%-100% Fade In] */
+@keyframes marqueeFadePauseLoop {
+  0%, 25% {
+    transform: translate3d(0, 0, 0);
+    opacity: 1;
+  }
+  75% {
+    transform: translate3d(var(--marquee-shift, 0px), 0, 0);
+    opacity: 1;
+  }
+  85% {
+    transform: translate3d(var(--marquee-shift, 0px), 0, 0);
+    opacity: 0;
+  }
+  86% {
+    transform: translate3d(0, 0, 0);
+    opacity: 0;
+  }
+  87%, 100% {
+    transform: translate3d(0, 0, 0);
+    opacity: 1;
+  }
+}
+
+/* ============================================================ */
+/* CINEMATIC ENTRANCE ANIMATION (Slower & Smoother Transition)  */
+/* ============================================================ */
+#cinematicOverlay {
+  position: fixed;
+  inset: 0;
+  background-color: #1B191A;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 1;
+  transition: opacity 1.8s cubic-bezier(0.22, 1, 0.36, 1);
+}
+body.page-loaded #cinematicOverlay {
+  opacity: 0;
+}
+
+#appWrapper {
+  transform: scale(1.07);
+  opacity: 0.75;
+  transition: transform 1.9s cubic-bezier(0.22, 1, 0.36, 1), opacity 1.8s cubic-bezier(0.22, 1, 0.36, 1);
+  transform-origin: center center;
+  will-change: transform, opacity;
+}
+body.page-loaded #appWrapper {
+  transform: scale(1);
+  opacity: 1;
+}
+
+.cinematic-item {
+  opacity: 0;
+  transform: translate3d(0, 18px, 0);
+  transition: opacity 1.4s cubic-bezier(0.22, 1, 0.36, 1), transform 1.4s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: opacity, transform;
+}
+body.page-loaded .cinematic-item {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+.delay-header { transition-delay: 0.25s; }
+.delay-title { transition-delay: 0.45s; }
+.delay-canvas { transition-delay: 0.65s; }
+.delay-artwork { transition-delay: 0.70s; }
+.delay-artist { transition-delay: 0.85s; }
+.delay-controls { transition-delay: 1.05s; }
+.delay-footer { transition-delay: 1.25s; }
