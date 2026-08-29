@@ -151,23 +151,111 @@
       will-change: transform, opacity;
     }
 
-    /* Fluid responsive adaptations for compact laptop screens (100% zoom) */
-    @media (max-height: 780px) {
-      .compact-h-shrink {
-        transform: scale(0.92);
-        transform-origin: center center;
+    /* ============================================================ */
+    /* MARQUEE AUTO-SCROLL SYSTEM (Smooth Fade & Pause Loop)        */
+    /* ============================================================ */
+    .marquee-container {
+      position: relative;
+      overflow: hidden;
+      white-space: nowrap;
+      mask-image: linear-gradient(90deg, transparent 0%, #000 14px, #000 calc(100% - 14px), transparent 100%);
+      -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 14px, #000 calc(100% - 14px), transparent 100%);
+      transition: mask-image 0.25s ease, -webkit-mask-image 0.25s ease;
+    }
+    .marquee-container.no-overflow {
+      mask-image: none !important;
+      -webkit-mask-image: none !important;
+    }
+    .marquee-content {
+      display: inline-block;
+      white-space: nowrap;
+      will-change: transform, opacity;
+      transform: translate3d(0, 0, 0);
+    }
+    .marquee-active {
+      animation: marqueeFadePauseLoop 10s cubic-bezier(0.4, 0.0, 0.2, 1) infinite;
+    }
+    .marquee-container:hover .marquee-active {
+      animation-play-state: paused;
+    }
+
+    /* Sequence: [0%-25% Pause] -> [25%-75% Scroll] -> [75%-85% Fade Out] -> [86% Snap Start] -> [87%-100% Fade In] */
+    @keyframes marqueeFadePauseLoop {
+      0%, 25% {
+        transform: translate3d(0, 0, 0);
+        opacity: 1;
+      }
+      75% {
+        transform: translate3d(var(--marquee-shift, 0px), 0, 0);
+        opacity: 1;
+      }
+      85% {
+        transform: translate3d(var(--marquee-shift, 0px), 0, 0);
+        opacity: 0;
+      }
+      86% {
+        transform: translate3d(0, 0, 0);
+        opacity: 0;
+      }
+      87%, 100% {
+        transform: translate3d(0, 0, 0);
+        opacity: 1;
       }
     }
-    @media (max-height: 680px) {
-      .compact-h-shrink {
-        transform: scale(0.85);
-        transform-origin: center center;
-      }
+
+    /* ============================================================ */
+    /* CINEMATIC ENTRANCE ANIMATION (Slower & Smoother Transition)  */
+    /* ============================================================ */
+    #cinematicOverlay {
+      position: fixed;
+      inset: 0;
+      background-color: #1B191A;
+      z-index: 9999;
+      pointer-events: none;
+      opacity: 1;
+      transition: opacity 1.8s cubic-bezier(0.22, 1, 0.36, 1);
     }
+    body.page-loaded #cinematicOverlay {
+      opacity: 0;
+    }
+
+    #appWrapper {
+      transform: scale(1.07);
+      opacity: 0.75;
+      transition: transform 1.9s cubic-bezier(0.22, 1, 0.36, 1), opacity 1.8s cubic-bezier(0.22, 1, 0.36, 1);
+      transform-origin: center center;
+      will-change: transform, opacity;
+    }
+    body.page-loaded #appWrapper {
+      transform: scale(1);
+      opacity: 1;
+    }
+
+    .cinematic-item {
+      opacity: 0;
+      transform: translate3d(0, 18px, 0);
+      transition: opacity 1.4s cubic-bezier(0.22, 1, 0.36, 1), transform 1.4s cubic-bezier(0.22, 1, 0.36, 1);
+      will-change: opacity, transform;
+    }
+    body.page-loaded .cinematic-item {
+      opacity: 1;
+      transform: translate3d(0, 0, 0);
+    }
+
+    .delay-header { transition-delay: 0.25s; }
+    .delay-title { transition-delay: 0.45s; }
+    .delay-canvas { transition-delay: 0.65s; }
+    .delay-artwork { transition-delay: 0.70s; }
+    .delay-artist { transition-delay: 0.85s; }
+    .delay-controls { transition-delay: 1.05s; }
+    .delay-footer { transition-delay: 1.25s; }
   </style>
 </head>
 
-<body class="h-screen h-[100dvh] w-screen overflow-hidden flex flex-col justify-between bg-[#1B191A] font-sans antialiased text-[#E9E4E0] relative selection:bg-terracotta selection:text-white">
+<body class="min-h-screen min-h-[100dvh] w-screen overflow-x-hidden overflow-y-auto flex flex-col justify-between bg-[#1B191A] font-sans antialiased text-[#E9E4E0] relative selection:bg-terracotta selection:text-white py-4 md:py-6">
+
+  <!-- ==================== CINEMATIC INTRO BLACK OVERLAY ==================== -->
+  <div id="cinematicOverlay"></div>
 
   <!-- ==================== AMBIENT BACKGROUND GLOW LAYERS ==================== -->
   <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden select-none">
@@ -187,203 +275,210 @@
     <div class="absolute inset-0 bg-radial from-transparent via-transparent to-[#1B191A]/60 mix-blend-multiply"></div>
   </div>
 
-  <!-- ==================== HEADER / NAV BAR ==================== -->
-  <header class="relative z-30 flex items-center justify-between px-6 sm:px-10 md:px-14 lg:px-16 pt-3 sm:pt-4 md:pt-5 pb-1.5 sm:pb-2.5 shrink-0">
-    <!-- Logo with geometric colored slashes -->
-    <div class="flex items-center space-x-3.5 cursor-pointer group" id="logoBtn">
-      <div class="flex space-x-1 items-center">
-        <div class="w-1.5 h-5 sm:h-6 rounded-sm transform -skew-x-12 theme-transition" style="background-color: var(--accent-primary);"></div>
-        <div class="w-1.5 h-5 sm:h-6 rounded-sm transform -skew-x-12 opacity-80 group-hover:opacity-100 theme-transition" style="background-color: var(--accent-light);"></div>
-        <div class="w-1.5 h-5 sm:h-6 rounded-sm transform -skew-x-12 opacity-60 group-hover:opacity-100 theme-transition" style="background-color: var(--accent-glow);"></div>
+  <!-- ==================== MAIN APP WRAPPER (Cinematic Zoom-out Dolly Motion) ==================== -->
+  <div id="appWrapper" class="relative z-10 w-full min-h-screen flex flex-col justify-between flex-1">
+
+    <!-- ==================== HEADER / NAV BAR ==================== -->
+    <header class="relative z-30 flex items-center justify-between px-6 sm:px-10 lg:px-14 py-2 sm:py-2.5 shrink-0 cinematic-item delay-header">
+      <!-- Logo with geometric colored slashes -->
+      <div class="flex items-center space-x-3 sm:space-x-3.5 cursor-pointer group" id="logoBtn">
+        <div class="flex space-x-1 items-center">
+          <div class="w-1.5 h-5 sm:h-6 rounded-sm transform -skew-x-12 theme-transition" style="background-color: var(--accent-primary);"></div>
+          <div class="w-1.5 h-5 sm:h-6 rounded-sm transform -skew-x-12 opacity-80 group-hover:opacity-100 theme-transition" style="background-color: var(--accent-light);"></div>
+          <div class="w-1.5 h-5 sm:h-6 rounded-sm transform -skew-x-12 opacity-60 group-hover:opacity-100 theme-transition" style="background-color: var(--accent-glow);"></div>
+        </div>
+        <span class="font-bold tracking-widest text-base sm:text-lg font-display uppercase text-offwhite group-hover:text-[var(--accent-light)] theme-transition">IconiWave</span>
       </div>
-      <span class="font-bold tracking-widest text-base sm:text-lg font-display uppercase text-offwhite group-hover:text-[var(--accent-light)] theme-transition">IconiWave</span>
-    </div>
 
-    <!-- Navigation Menu (Editorial Style) -->
-    <nav class="hidden lg:flex items-center space-x-7 xl:space-x-8 text-[11px] xl:text-xs font-semibold tracking-widest uppercase text-offwhite-muted">
-      <button id="navNowPlaying" class="text-offwhite hover:text-[var(--accent-light)] theme-transition relative py-1 after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-full after:h-[2px]" style="--tw-after-bg: var(--accent-primary);">
-        NOW PLAYING
-      </button>
-      <button id="navVisualizer" class="hover:text-offwhite transition-colors">
-        VISUALIZER MODES
-      </button>
-      <button id="navSoundFx" class="hover:text-offwhite transition-colors">
-        SOUND FX
-      </button>
-      <button id="navPresets" class="hover:text-offwhite transition-colors">
-        PRESETS
-      </button>
-    </nav>
+      <!-- Navigation Menu (Editorial Style) -->
+      <nav class="hidden lg:flex items-center space-x-6 xl:space-x-8 text-[11px] xl:text-xs font-semibold tracking-widest uppercase text-offwhite-muted">
+        <button id="navNowPlaying" class="text-offwhite hover:text-[var(--accent-light)] theme-transition relative py-1 after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-full after:h-[2px]" style="--tw-after-bg: var(--accent-primary);">
+          NOW PLAYING
+        </button>
+        <button id="navVisualizer" class="hover:text-offwhite transition-colors">
+          VISUALIZER MODES
+        </button>
+        <button id="navSoundFx" class="hover:text-offwhite transition-colors">
+          SOUND FX
+        </button>
+        <button id="navPresets" class="hover:text-offwhite transition-colors">
+          PRESETS
+        </button>
+      </nav>
 
-    <!-- Right Controls: Theme Switcher & Utility buttons -->
-    <div class="flex items-center space-x-2.5 sm:space-x-3.5">
+      <!-- Right Controls: Theme Switcher & Utility buttons -->
+      <div class="flex items-center space-x-2 sm:space-x-3">
+        
+        <!-- Minimalist Theme Picker (6 Color Dots) -->
+        <div class="flex items-center space-x-1.5 bg-charcoal-card/90 border border-white/10 px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-full shadow-inner backdrop-blur-md" id="themePickerContainer">
+          <!-- Injected via JavaScript -->
+        </div>
+
+        <label for="audioFileInput" class="flex items-center space-x-1.5 sm:space-x-2 text-[11px] sm:text-xs font-medium bg-charcoal-card hover:bg-white/5 text-offwhite border border-white/10 hover:border-[var(--accent-light)] px-2.5 py-1.5 sm:px-3.5 sm:py-2 rounded-full cursor-pointer theme-transition">
+          <i data-lucide="upload" class="w-3.5 h-3.5" style="color: var(--accent-light);"></i>
+          <span class="hidden sm:inline">Upload Audio</span>
+        </label>
+        <input type="file" id="audioFileInput" accept="audio/*" class="hidden">
+
+        <button id="modalInfoBtn" class="p-1.5 sm:p-2 text-offwhite-muted hover:text-offwhite hover:bg-white/5 rounded-full transition-colors" title="Settings & About">
+          <i data-lucide="info" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- ==================== HERO MAIN CONTAINER ==================== -->
+    <main class="relative z-10 flex-1 w-full grid grid-cols-1 lg:grid-cols-12 items-center px-6 sm:px-10 lg:px-14 py-2 md:py-4 gap-4 sm:gap-6 lg:gap-8 xl:gap-10">
       
-      <!-- Minimalist Theme Picker (6 Color Dots) -->
-      <div class="flex items-center space-x-1.5 bg-charcoal-card/90 border border-white/10 px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-full shadow-inner backdrop-blur-md" id="themePickerContainer">
-        <!-- Injected via JavaScript -->
-      </div>
-
-      <label for="audioFileInput" class="flex items-center space-x-1.5 sm:space-x-2 text-[11px] sm:text-xs font-medium bg-charcoal-card hover:bg-white/5 text-offwhite border border-white/10 hover:border-[var(--accent-light)] px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-full cursor-pointer theme-transition">
-        <i data-lucide="upload" class="w-3.5 h-3.5" style="color: var(--accent-light);"></i>
-        <span class="hidden sm:inline">Upload Audio</span>
-      </label>
-      <input type="file" id="audioFileInput" accept="audio/*" class="hidden">
-
-      <button id="modalInfoBtn" class="p-1.5 sm:p-2 text-offwhite-muted hover:text-offwhite hover:bg-white/5 rounded-full transition-colors" title="Settings & About">
-        <i data-lucide="info" class="w-4 h-4"></i>
-      </button>
-    </div>
-  </header>
-
-  <!-- ==================== HERO MAIN CONTAINER ==================== -->
-  <main class="relative z-10 flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-12 items-center px-6 sm:px-10 md:px-14 lg:px-16 py-1 sm:py-2 md:py-3 gap-5 sm:gap-6 lg:gap-8 xl:gap-12 overflow-y-auto lg:overflow-hidden">
-    
-    <!-- LEFT COLUMN: Typography, Smooth Real-time Waveform & Audio Controls -->
-    <section class="lg:col-span-6 flex flex-col justify-center space-y-3 sm:space-y-4 md:space-y-4.5 xl:space-y-5 lg:pr-2 xl:pr-6 z-20">
-      
-      <!-- Subtitle badge -->
-      <div class="flex items-center space-x-2.5">
-        <span class="inline-block w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full animate-ping theme-transition" style="background-color: var(--accent-primary);"></span>
-        <p id="trackCategory" class="text-[10px] sm:text-[11px] md:text-xs tracking-[0.22em] uppercase font-bold text-offwhite-muted">
-          OUR VERSION • EXPERIENCE 01
-        </p>
-      </div>
-
-      <!-- Massive Track Title (Reference Design style - Fluid scalable font) -->
-      <div class="space-y-0.5">
-        <h1 id="trackTitle" class="text-4xl sm:text-5xl md:text-6xl lg:text-6xl xl:text-7xl 2xl:text-8xl font-black font-display tracking-tight text-offwhite uppercase leading-none">
-          DESIGN
-        </h1>
-      </div>
-
-      <!-- REAL-TIME SMOOTH WAVEFORM CANVAS (Directly between Title and Artist) -->
-      <div class="relative w-full bg-charcoal-card/60 backdrop-blur-md rounded-2xl border border-white/5 p-2.5 sm:p-3 md:p-3.5 shadow-2xl overflow-hidden group">
-        <div class="flex items-center justify-between text-[10px] sm:text-[11px] font-mono text-offwhite-dim uppercase tracking-wider mb-1.5 sm:mb-2">
-          <div class="flex items-center space-x-2">
-            <span class="w-1.5 h-1.5 rounded-full theme-transition" style="background-color: var(--accent-primary);"></span>
-            <span id="canvasModeLabel">Real-time Spectral Waveform</span>
-          </div>
-          <div class="flex items-center space-x-2">
-            <button id="toggleWaveStyle" class="text-offwhite-muted hover:text-[var(--accent-light)] transition-colors flex items-center space-x-1" title="Cycle visualizer modes">
-              <i data-lucide="sliders" class="w-3 h-3"></i>
-              <span id="waveStyleName">Wave</span>
-            </button>
+      <!-- LEFT COLUMN: Typography, Smooth Real-time Waveform & Audio Controls -->
+      <section class="lg:col-span-6 flex flex-col justify-center space-y-2 sm:space-y-3 md:space-y-3.5 xl:space-y-4 lg:pr-2 xl:pr-6 z-20">
+        
+        <!-- Subtitle badge with overflow protection -->
+        <div class="flex items-center space-x-2 max-w-full overflow-hidden cinematic-item delay-title">
+          <span class="inline-block w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full animate-ping theme-transition shrink-0" style="background-color: var(--accent-primary);"></span>
+          <div id="trackCategoryContainer" class="overflow-hidden marquee-container no-overflow flex items-center flex-1" title="OUR VERSION • EXPERIENCE 01">
+            <p id="trackCategory" class="marquee-content text-[10px] sm:text-[11px] md:text-xs tracking-[0.22em] uppercase font-bold text-offwhite-muted whitespace-nowrap">
+              OUR VERSION • EXPERIENCE 01
+            </p>
           </div>
         </div>
 
-        <!-- Canvas for Audio Visualizer (Fluid adaptive height) -->
-        <canvas id="waveformCanvas" class="w-full h-18 sm:h-20 md:h-22 lg:h-24 rounded-lg cursor-pointer" width="700" height="110"></canvas>
-        
-        <!-- Glow reflection inside canvas box -->
-        <div id="canvasGlowReflection" class="absolute -bottom-6 left-1/2 transform -translate-x-1/2 w-3/4 h-8 blur-xl pointer-events-none theme-transition" style="background-color: rgba(var(--accent-glow-rgb), 0.35);"></div>
-      </div>
+        <!-- Massive Track Title with Fixed Height & Marquee Auto-Scroll (Apple Music / Spotify Style) -->
+        <div id="trackTitleContainer" class="w-full max-w-full overflow-hidden marquee-container no-overflow h-8 sm:h-10 md:h-12 lg:h-14 xl:h-16 flex items-center select-none cinematic-item delay-title" title="DESIGN">
+          <h1 id="trackTitle" class="marquee-content text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl 2xl:text-8xl font-black font-display tracking-tight text-offwhite uppercase leading-none whitespace-nowrap">
+            DESIGN
+          </h1>
+        </div>
 
-      <!-- Artist & Editorial Description -->
-      <div class="space-y-1 sm:space-y-1.5 max-w-xl">
-        <p id="trackArtist" class="text-xs sm:text-sm font-semibold uppercase tracking-wider theme-transition" style="color: var(--accent-light);">
-          Sculpted by IconiWave Sound Lab
-        </p>
-        <p id="trackDescription" class="text-offwhite-muted text-xs sm:text-sm md:text-[14px] font-normal leading-relaxed line-clamp-2 md:line-clamp-3">
-          Our audio engine crafts a modern and soothing resonance, creating the key to deep immersion, ambient mindfulness, and emotional focus.
-        </p>
-      </div>
-
-      <!-- Interactive Controls (Circular Play/Pause button inspired by "See More" in Ref) -->
-      <div class="flex flex-wrap items-center gap-3 sm:gap-4 md:gap-4.5 pt-0.5 sm:pt-1">
-        <!-- Main circular Play / Pause Button with aura border -->
-        <button id="mainPlayBtn" class="flex items-center space-x-3 sm:space-x-3.5 group cursor-pointer">
-          <div id="playBtnCircle" class="relative flex items-center justify-center w-11 h-11 sm:w-12 sm:h-12 md:w-13 md:h-13 rounded-full border border-offwhite/30 transition-all duration-300 shadow-lg group-hover:border-[var(--accent-primary)] group-hover:bg-[var(--accent-primary)] group-hover:shadow-[0_0_30px_rgba(var(--accent-glow-rgb),0.85),0_0_15px_rgba(var(--accent-rgb),0.6)]">
-            <div id="playIconContainer" class="text-offwhite group-hover:text-white transition-colors transform group-hover:scale-110">
-              <i data-lucide="play" class="w-4 h-4 sm:w-5 sm:h-5 ml-0.5 fill-current"></i>
+        <!-- REAL-TIME SMOOTH WAVEFORM CANVAS (Responsive Height, directly between Title and Artist) -->
+        <div class="relative w-full bg-charcoal-card/60 backdrop-blur-md rounded-2xl border border-white/5 p-2 sm:p-2.5 md:p-3 shadow-2xl overflow-hidden group cinematic-item delay-canvas">
+          <div class="flex items-center justify-between text-[10px] sm:text-[11px] font-mono text-offwhite-dim uppercase tracking-wider mb-1 sm:mb-1.5">
+            <div class="flex items-center space-x-2">
+              <span class="w-1.5 h-1.5 rounded-full theme-transition" style="background-color: var(--accent-primary);"></span>
+              <span id="canvasModeLabel">Real-time Spectral Waveform</span>
             </div>
-            <!-- Ripple aura ring -->
-            <div id="playRing" class="absolute inset-0 rounded-full border opacity-0 group-hover:opacity-100 animate-ping pointer-events-none" style="border-color: var(--accent-primary);"></div>
+            <div class="flex items-center space-x-2">
+              <button id="toggleWaveStyle" class="text-offwhite-muted hover:text-[var(--accent-light)] transition-colors flex items-center space-x-1" title="Cycle visualizer modes">
+                <i data-lucide="sliders" class="w-3 h-3"></i>
+                <span id="waveStyleName">Wave</span>
+              </button>
+            </div>
           </div>
-          <span id="playButtonText" class="text-xs sm:text-sm font-bold uppercase tracking-widest text-offwhite group-hover:text-[var(--accent-light)] transition-colors">
-            Play Experience
-          </span>
-        </button>
 
-        <!-- Preset Switcher (Next / Prev) -->
-        <div class="flex items-center space-x-1.5 sm:space-x-2 bg-charcoal-card border border-white/10 rounded-full px-2.5 py-1.5">
-          <button id="prevTrackBtn" class="p-1 sm:p-1.5 text-offwhite-muted hover:text-offwhite hover:bg-white/5 rounded-full transition-colors" title="Previous Preset">
-            <i data-lucide="skip-back" class="w-3.5 h-3.5"></i>
-          </button>
-          <span id="presetIndicator" class="text-[11px] sm:text-xs font-mono font-medium px-1.5 text-offwhite">01 / 03</span>
-          <button id="nextTrackBtn" class="p-1 sm:p-1.5 text-offwhite-muted hover:text-offwhite hover:bg-white/5 rounded-full transition-colors" title="Next Preset">
-            <i data-lucide="skip-forward" class="w-3.5 h-3.5"></i>
-          </button>
-        </div>
-
-        <!-- Volume Control Slider -->
-        <div class="flex items-center space-x-2 bg-charcoal-card border border-white/10 rounded-full px-3 py-1.5 sm:py-2">
-          <button id="muteBtn" class="text-offwhite-muted hover:text-offwhite transition-colors">
-            <i data-lucide="volume-2" id="volumeIcon" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
-          </button>
-          <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="0.75" class="w-16 sm:w-20 cursor-pointer">
-        </div>
-
-        <!-- Sound FX / Filter toggle button -->
-        <button id="fxLoFiBtn" class="flex items-center space-x-1.5 text-[11px] sm:text-xs font-semibold px-3 py-1.5 sm:py-2 rounded-full border border-white/10 bg-charcoal-card hover:border-[var(--accent-primary)] text-offwhite-muted hover:text-offwhite transition-all">
-          <i data-lucide="disc" class="w-3.5 h-3.5 theme-transition" style="color: var(--accent-primary);"></i>
-          <span>Lo-Fi: <span id="fxStatus" class="font-mono theme-transition" style="color: var(--accent-primary);">OFF</span></span>
-        </button>
-      </div>
-
-    </section>
-
-    <!-- RIGHT COLUMN: Iconic Terracotta Circle & Sculpture / Artwork Graphic (Fluid Dynamic Heights) -->
-    <section class="lg:col-span-6 relative flex items-center justify-center h-full max-h-[48vh] sm:max-h-[54vh] md:max-h-[58vh] lg:max-h-[62vh] min-h-[220px] sm:min-h-[280px] lg:min-h-0">
-      
-      <!-- Big Accent Circle (The defining design element from Reference 1 - Viewport Aware) -->
-      <div id="bigCircle" class="absolute w-[min(340px,36vh)] h-[min(340px,36vh)] sm:w-[min(380px,42vh)] sm:h-[min(380px,42vh)] lg:w-[min(430px,46vh)] lg:h-[min(430px,46vh)] xl:w-[450px] xl:h-[450px] rounded-full flex items-center justify-center transition-all duration-700 animate-orb" style="background: linear-gradient(135deg, var(--accent-light), var(--accent-primary), var(--accent-dark)); box-shadow: 0 0 50px rgba(var(--accent-glow-rgb), 0.65), 0 0 140px rgba(var(--accent-rgb), 0.55);">
-      </div>
-
-      <!-- Foreground Sculpture / Artwork Image with Duotone Blend -->
-      <div class="relative z-10 flex flex-col items-center group">
-        
-        <!-- Artwork frame with subtle floating animation (Clamped to viewport height) -->
-        <div class="relative w-[min(260px,32vh)] h-[min(320px,40vh)] sm:w-[min(310px,38vh)] sm:h-[min(380px,46vh)] lg:w-[min(360px,44vh)] lg:h-[min(430px,50vh)] xl:w-[390px] xl:h-[460px] flex items-center justify-center animate-float">
+          <!-- Canvas for Audio Visualizer (Fluid adaptive responsive height) -->
+          <canvas id="waveformCanvas" class="w-full h-14 sm:h-16 md:h-18 lg:h-20 xl:h-22 max-h-[14vh] rounded-lg cursor-pointer" width="700" height="100"></canvas>
           
-          <img id="artworkImage" 
-               src="https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=900&q=80" 
-               alt="Iconic Artwork" 
-               class="max-w-full max-h-full object-contain filter drop-shadow-[0_20px_40px_rgba(0,0,0,0.8)] contrast-125 transition-all duration-500 rounded-2xl">
+          <!-- Glow reflection inside canvas box -->
+          <div id="canvasGlowReflection" class="absolute -bottom-6 left-1/2 transform -translate-x-1/2 w-3/4 h-8 blur-xl pointer-events-none theme-transition" style="background-color: rgba(var(--accent-glow-rgb), 0.35);"></div>
+        </div>
 
-          <!-- Duotone Accent Overlay Filter for seamless blend -->
-          <div id="duotoneOverlay" class="absolute inset-0 mix-blend-color pointer-events-none rounded-2xl theme-transition" style="background-color: rgba(var(--accent-rgb), 0.2);"></div>
+        <!-- Artist & Editorial Description with Fixed Height & Marquee Auto-Scroll -->
+        <div class="space-y-1 max-w-xl w-full cinematic-item delay-artist">
+          <div id="trackArtistContainer" class="w-full max-w-full overflow-hidden marquee-container no-overflow h-4.5 sm:h-5 flex items-center" title="Sculpted by IconiWave Sound Lab">
+            <p id="trackArtist" class="marquee-content text-xs sm:text-sm font-semibold uppercase tracking-wider theme-transition whitespace-nowrap" style="color: var(--accent-light);">
+              Sculpted by IconiWave Sound Lab
+            </p>
+          </div>
+          <p id="trackDescription" class="text-offwhite-muted text-xs sm:text-[13px] md:text-sm font-normal leading-relaxed line-clamp-2 md:line-clamp-3">
+            Our audio engine crafts a modern and soothing resonance, creating the key to deep immersion, ambient mindfulness, and emotional focus.
+          </p>
+        </div>
 
-          <!-- Quick artwork change button overlay -->
-          <div class="absolute bottom-3 right-3 sm:bottom-4 sm:right-4 flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <label for="imageFileInput" class="p-2 sm:p-2.5 bg-charcoal/90 hover:bg-[var(--accent-primary)] border border-white/20 rounded-full cursor-pointer shadow-lg transition-all" title="Upload Custom Artwork">
-              <i data-lucide="image" class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-offwhite"></i>
-            </label>
-            <input type="file" id="imageFileInput" accept="image/*" class="hidden">
+        <!-- Interactive Controls (Circular Play/Pause button inspired by "See More" in Ref) -->
+        <div class="flex flex-wrap items-center gap-2 sm:gap-2.5 md:gap-3.5 pt-0.5 sm:pt-1 cinematic-item delay-controls">
+          <!-- Main circular Play / Pause Button with aura border -->
+          <button id="mainPlayBtn" class="flex items-center space-x-2 sm:space-x-2.5 group cursor-pointer">
+            <div id="playBtnCircle" class="relative flex items-center justify-center w-9 h-9 sm:w-11 sm:h-11 md:w-12 md:h-12 rounded-full border border-offwhite/30 transition-all duration-300 shadow-lg group-hover:border-[var(--accent-primary)] group-hover:bg-[var(--accent-primary)] group-hover:shadow-[0_0_30px_rgba(var(--accent-glow-rgb),0.85),0_0_15px_rgba(var(--accent-rgb),0.6)]">
+              <div id="playIconContainer" class="text-offwhite group-hover:text-white transition-colors transform group-hover:scale-110">
+                <i data-lucide="play" class="w-3.5 h-3.5 sm:w-4 sm:h-4 ml-0.5 fill-current"></i>
+              </div>
+              <!-- Ripple aura ring -->
+              <div id="playRing" class="absolute inset-0 rounded-full border opacity-0 group-hover:opacity-100 animate-ping pointer-events-none" style="border-color: var(--accent-primary);"></div>
+            </div>
+            <span id="playButtonText" class="text-xs sm:text-sm font-bold uppercase tracking-widest text-offwhite group-hover:text-[var(--accent-light)] transition-colors">
+              Play Experience
+            </span>
+          </button>
 
-            <button id="changeArtworkPresetBtn" class="p-2 sm:p-2.5 bg-charcoal/90 hover:bg-[var(--accent-primary)] border border-white/20 rounded-full cursor-pointer shadow-lg transition-all" title="Random Preset Artwork">
-              <i data-lucide="refresh-cw" class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-offwhite"></i>
+          <!-- Preset Switcher (Next / Prev) -->
+          <div class="flex items-center space-x-1.5 bg-charcoal-card border border-white/10 rounded-full px-2 py-1 sm:px-2.5 sm:py-1.5">
+            <button id="prevTrackBtn" class="p-1 text-offwhite-muted hover:text-offwhite hover:bg-white/5 rounded-full transition-colors" title="Previous Preset">
+              <i data-lucide="skip-back" class="w-3.5 h-3.5"></i>
+            </button>
+            <span id="presetIndicator" class="text-[10px] sm:text-xs font-mono font-medium px-1 text-offwhite">01 / 03</span>
+            <button id="nextTrackBtn" class="p-1 text-offwhite-muted hover:text-offwhite hover:bg-white/5 rounded-full transition-colors" title="Next Preset">
+              <i data-lucide="skip-forward" class="w-3.5 h-3.5"></i>
             </button>
           </div>
+
+          <!-- Volume Control Slider -->
+          <div class="flex items-center space-x-1.5 bg-charcoal-card border border-white/10 rounded-full px-2.5 py-1 sm:px-3 sm:py-1.5">
+            <button id="muteBtn" class="text-offwhite-muted hover:text-offwhite transition-colors">
+              <i data-lucide="volume-2" id="volumeIcon" class="w-3.5 h-3.5"></i>
+            </button>
+            <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="0.75" class="w-14 sm:w-18 cursor-pointer">
+          </div>
+
+          <!-- Sound FX / Filter toggle button -->
+          <button id="fxLoFiBtn" class="flex items-center space-x-1.5 text-[10px] sm:text-xs font-semibold px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full border border-white/10 bg-charcoal-card hover:border-[var(--accent-primary)] text-offwhite-muted hover:text-offwhite transition-all">
+            <i data-lucide="disc" class="w-3.5 h-3.5 theme-transition" style="color: var(--accent-primary);"></i>
+            <span>Lo-Fi: <span id="fxStatus" class="font-mono theme-transition" style="color: var(--accent-primary);">OFF</span></span>
+          </button>
         </div>
 
-      </div>
+      </section>
 
-      <!-- Small Floating Accent Sphere at the bottom left (matches the small circle in reference image 1) -->
-      <div id="smallSphere" class="absolute bottom-0 left-2 sm:left-6 md:left-8 w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 lg:w-[min(84px,11vh)] lg:h-[min(84px,11vh)] rounded-full z-20 pointer-events-none transform -translate-y-2 sm:-translate-y-4 animate-bounce theme-transition" style="background: linear-gradient(to top, var(--accent-dark), var(--accent-primary)); box-shadow: 0 0 25px rgba(var(--accent-glow-rgb), 0.85), 0 10px 40px rgba(var(--accent-rgb), 0.65); animation-duration: 4s;"></div>
+      <!-- RIGHT COLUMN: Iconic Terracotta Circle & Sculpture / Artwork Graphic (Fluid Dynamic Heights) -->
+      <section class="lg:col-span-6 relative flex items-center justify-center h-full max-h-[40vh] sm:max-h-[46vh] md:max-h-[52vh] lg:max-h-[56vh] min-h-[200px] sm:min-h-[240px] lg:min-h-0 cinematic-item delay-artwork">
+        
+        <!-- Big Accent Circle (The defining design element from Reference 1 - Viewport Aware) -->
+        <div id="bigCircle" class="absolute w-[min(260px,30vh)] h-[min(260px,30vh)] sm:w-[min(320px,36vh)] sm:h-[min(320px,36vh)] lg:w-[min(380px,40vh)] lg:h-[min(380px,40vh)] xl:w-[420px] xl:h-[420px] rounded-full flex items-center justify-center transition-all duration-700 animate-orb" style="background: linear-gradient(135deg, var(--accent-light), var(--accent-primary), var(--accent-dark)); box-shadow: 0 0 50px rgba(var(--accent-glow-rgb), 0.65), 0 0 140px rgba(var(--accent-rgb), 0.55);">
+        </div>
 
-    </section>
+        <!-- Foreground Sculpture / Artwork Image with Duotone Blend -->
+        <div class="relative z-10 flex flex-col items-center group">
+          
+          <!-- Artwork frame with subtle floating animation (Clamped to viewport height) -->
+          <div class="relative w-[min(200px,24vh)] h-[min(250px,30vh)] sm:w-[min(250px,30vh)] sm:h-[min(300px,36vh)] lg:w-[min(300px,36vh)] lg:h-[min(360px,42vh)] xl:w-[350px] xl:h-[420px] flex items-center justify-center animate-float">
+            
+            <img id="artworkImage" 
+                 src="https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=900&q=80" 
+                 alt="Iconic Artwork" 
+                 class="max-w-full max-h-full object-contain filter drop-shadow-[0_20px_40px_rgba(0,0,0,0.8)] contrast-125 transition-all duration-500 rounded-2xl">
 
-  </main>
+            <!-- Duotone Accent Overlay Filter for seamless blend -->
+            <div id="duotoneOverlay" class="absolute inset-0 mix-blend-color pointer-events-none rounded-2xl theme-transition" style="background-color: rgba(var(--accent-rgb), 0.2);"></div>
 
-  <!-- ==================== BOTTOM BAR / PROGRESS SCRUBBER ==================== -->
-  <footer class="relative z-30 px-6 sm:px-10 md:px-14 lg:px-16 py-2.5 sm:py-3.5 md:py-4 flex flex-col sm:flex-row items-center justify-between gap-2.5 sm:gap-4 border-t border-white/5 bg-[#1B191A]/90 backdrop-blur-md shrink-0">
+            <!-- Quick artwork change button overlay -->
+            <div class="absolute bottom-2.5 right-2.5 sm:bottom-3 sm:right-3 flex space-x-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              <label for="imageFileInput" class="p-1.5 sm:p-2 bg-charcoal/90 hover:bg-[var(--accent-primary)] border border-white/20 rounded-full cursor-pointer shadow-lg transition-all" title="Upload Custom Artwork">
+                <i data-lucide="image" class="w-3.5 h-3.5 text-offwhite"></i>
+              </label>
+              <input type="file" id="imageFileInput" accept="image/*" class="hidden">
+
+              <button id="changeArtworkPresetBtn" class="p-1.5 sm:p-2 bg-charcoal/90 hover:bg-[var(--accent-primary)] border border-white/20 rounded-full cursor-pointer shadow-lg transition-all" title="Random Preset Artwork">
+                <i data-lucide="refresh-cw" class="w-3.5 h-3.5 text-offwhite"></i>
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Small Floating Accent Sphere at the bottom left (matches the small circle in reference image 1) -->
+        <div id="smallSphere" class="absolute bottom-0 left-2 sm:left-4 md:left-6 w-10 h-10 sm:w-13 sm:h-13 md:w-16 md:h-16 lg:w-[min(65px,8vh)] lg:h-[min(65px,8vh)] rounded-full z-20 pointer-events-none transform -translate-y-2 animate-bounce theme-transition" style="background: linear-gradient(to top, var(--accent-dark), var(--accent-primary)); box-shadow: 0 0 25px rgba(var(--accent-glow-rgb), 0.85), 0 10px 40px rgba(var(--accent-rgb), 0.65); animation-duration: 4s;"></div>
+
+      </section>
+
+    </main>
+
+    <!-- ==================== BOTTOM BAR / PROGRESS SCRUBBER ==================== -->
+    <footer class="relative z-30 px-6 sm:px-10 lg:px-14 py-2 sm:py-2.5 md:py-3 flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-3 border-t border-white/5 bg-[#1B191A]/90 backdrop-blur-md shrink-0 cinematic-item delay-footer">
     
     <!-- Progress Indicator styled as "01 ────────── 03" as seen in the reference photo -->
     <div class="flex items-center space-x-3 sm:space-x-4 w-full max-w-md">
       <span id="footerCurrentIndex" class="text-xs font-mono font-bold text-offwhite tracking-widest">01</span>
       
       <!-- Interactive Scrubber Bar with Scrub / Drag & Hover Preview -->
-      <div id="progressBarContainer" class="relative flex-1 py-2 sm:py-3 cursor-pointer group select-none flex items-center">
+      <div id="progressBarContainer" class="relative flex-1 py-2 sm:py-2.5 cursor-pointer group select-none flex items-center">
         <!-- Background Track -->
         <div class="h-1.5 w-full bg-charcoal-card rounded-full relative overflow-hidden">
           <!-- Hover preview shadow bar -->
@@ -414,7 +509,8 @@
       </div>
     </div>
 
-  </footer>
+    </footer>
+  </div>
 
   <!-- ==================== MODAL: AUDIO SETTINGS & INFO ==================== -->
   <div id="infoModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
@@ -1283,14 +1379,67 @@
     // ==========================================
     // 4. UI INTERACTIVITY & PRESET MANAGEMENT
     // ==========================================
+    // Dynamic text overflow calculator for smooth Marquee Auto-Scroll
+    function updateTextWithMarquee(containerId, textElemId, newText, defaultTitle) {
+      const container = document.getElementById(containerId);
+      const textElem = document.getElementById(textElemId);
+      if (!container || !textElem) return;
+
+      textElem.textContent = newText;
+      const tooltip = defaultTitle || newText;
+      textElem.title = tooltip;
+      container.title = tooltip;
+
+      // Reset styles to calculate true scrollWidth
+      textElem.classList.remove('marquee-active');
+      container.classList.add('no-overflow');
+      textElem.style.removeProperty('--marquee-shift');
+      textElem.style.transform = 'translate3d(0, 0, 0)';
+
+      // Wait for layout reflow
+      requestAnimationFrame(() => {
+        const containerWidth = container.clientWidth;
+        const textWidth = textElem.scrollWidth;
+
+        if (textWidth > containerWidth + 6) {
+          const shift = containerWidth - textWidth - 14;
+          textElem.style.setProperty('--marquee-shift', `${shift}px`);
+          const duration = Math.max(9, Math.min(24, 8 + Math.abs(shift) / 24));
+          textElem.style.animationDuration = `${duration.toFixed(1)}s`;
+          textElem.classList.add('marquee-active');
+          container.classList.remove('no-overflow');
+        } else {
+          textElem.classList.remove('marquee-active');
+          container.classList.add('no-overflow');
+          textElem.style.transform = 'translate3d(0, 0, 0)';
+          textElem.style.opacity = '1';
+        }
+      });
+    }
+
+    function refreshAllMarquees() {
+      const currentTrack = isCustomAudio
+        ? {
+            title: document.getElementById('trackTitle').textContent,
+            artist: document.getElementById('trackArtist').textContent,
+            category: document.getElementById('trackCategory').textContent
+          }
+        : TRACK_PRESETS[currentTrackIndex];
+
+      updateTextWithMarquee('trackTitleContainer', 'trackTitle', currentTrack.title);
+      updateTextWithMarquee('trackArtistContainer', 'trackArtist', currentTrack.artist);
+      updateTextWithMarquee('trackCategoryContainer', 'trackCategory', currentTrack.category);
+    }
+    window.addEventListener('resize', refreshAllMarquees);
+
     function setTrackPreset(index) {
       currentTrackIndex = (index + TRACK_PRESETS.length) % TRACK_PRESETS.length;
       const track = TRACK_PRESETS[currentTrackIndex];
 
-      // Update Typography
-      document.getElementById('trackTitle').textContent = track.title;
-      document.getElementById('trackCategory').textContent = track.category;
-      document.getElementById('trackArtist').textContent = track.artist;
+      // Update Typography with smooth Marquee Auto-Scroll
+      updateTextWithMarquee('trackTitleContainer', 'trackTitle', track.title);
+      updateTextWithMarquee('trackCategoryContainer', 'trackCategory', track.category);
+      updateTextWithMarquee('trackArtistContainer', 'trackArtist', track.artist);
       document.getElementById('trackDescription').textContent = track.description;
 
       // Update Artwork & Duotone transition
@@ -1414,10 +1563,11 @@
       customAudioSource.connect(lofiFilterNode);
 
       isCustomAudio = true;
-      document.getElementById('trackTitle').textContent = file.name.replace(/\.[^/.]+$/, '').toUpperCase();
-      document.getElementById('trackArtist').textContent = 'User Uploaded Audio';
+      const uploadedTitle = file.name.replace(/\.[^/.]+$/, '').toUpperCase();
+      updateTextWithMarquee('trackTitleContainer', 'trackTitle', uploadedTitle);
+      updateTextWithMarquee('trackArtistContainer', 'trackArtist', 'User Uploaded Audio');
+      updateTextWithMarquee('trackCategoryContainer', 'trackCategory', 'USER FILE • EXTERNAL');
       document.getElementById('trackDescription').textContent = `Now streaming "${file.name}" with real-time waveform processing.`;
-      document.getElementById('trackCategory').textContent = 'USER FILE • EXTERNAL';
 
       // Duration & time tracking
       customAudioElement.addEventListener('loadedmetadata', () => {
@@ -1613,6 +1763,29 @@
         setTrackPreset(currentTrackIndex - 1);
       }
     });
+
+    // Initial Marquee check on load
+    window.addEventListener('load', refreshAllMarquees);
+    refreshAllMarquees();
+
+    // ==========================================
+    // CINEMATIC ENTRANCE ANIMATION TRIGGER
+    // ==========================================
+    function triggerCinematicEntrance() {
+      requestAnimationFrame(() => {
+        document.body.classList.add('page-loaded');
+        setTimeout(() => {
+          const overlay = document.getElementById('cinematicOverlay');
+          if (overlay) overlay.remove();
+        }, 2400);
+      });
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', triggerCinematicEntrance);
+    } else {
+      triggerCinematicEntrance();
+    }
   </script>
 </body>
 </html>
