@@ -150,43 +150,57 @@
       animation: ambientDriftBottom 10s ease-in-out infinite;
       will-change: transform, opacity;
     }
+
+    /* Fluid responsive adaptations for compact laptop screens (100% zoom) */
+    @media (max-height: 780px) {
+      .compact-h-shrink {
+        transform: scale(0.92);
+        transform-origin: center center;
+      }
+    }
+    @media (max-height: 680px) {
+      .compact-h-shrink {
+        transform: scale(0.85);
+        transform-origin: center center;
+      }
+    }
   </style>
 </head>
 
-<body class="h-screen w-screen overflow-hidden flex flex-col justify-between bg-[#1B191A] font-sans antialiased text-[#E9E4E0] relative">
+<body class="h-screen h-[100dvh] w-screen overflow-hidden flex flex-col justify-between bg-[#1B191A] font-sans antialiased text-[#E9E4E0] relative selection:bg-terracotta selection:text-white">
 
   <!-- ==================== AMBIENT BACKGROUND GLOW LAYERS ==================== -->
   <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden select-none">
     <!-- Hero Artwork Ambient Glow (Right side behind sculpture) -->
-    <div id="ambientHeroGlow" class="absolute top-1/2 right-[-5%] sm:right-[5%] lg:right-[8%] -translate-y-1/2 w-[520px] h-[520px] sm:w-[650px] sm:h-[650px] lg:w-[780px] lg:h-[780px] rounded-full blur-[130px] ambient-glow-right transition-all duration-500" style="background: radial-gradient(circle, rgba(var(--accent-rgb), 0.45) 0%, rgba(var(--accent-glow-rgb), 0.30) 45%, transparent 70%);"></div>
+    <div id="ambientHeroGlow" class="absolute top-1/2 right-[-5%] sm:right-[5%] lg:right-[8%] -translate-y-1/2 w-[480px] h-[480px] sm:w-[580px] sm:h-[580px] lg:w-[700px] lg:h-[700px] rounded-full blur-[130px] ambient-glow-right transition-all duration-500" style="background: radial-gradient(circle, rgba(var(--accent-rgb), 0.45) 0%, rgba(var(--accent-glow-rgb), 0.30) 45%, transparent 70%);"></div>
 
     <!-- Top-Left Soft Glow (Balances typography area with warm neon bloom) -->
-    <div id="ambientLeftGlow" class="absolute -top-24 -left-24 w-[420px] h-[420px] sm:w-[540px] sm:h-[540px] rounded-full blur-[140px] ambient-glow-left transition-all duration-500" style="background: radial-gradient(circle, rgba(var(--accent-rgb), 0.28) 0%, transparent 70%);"></div>
+    <div id="ambientLeftGlow" class="absolute -top-24 -left-24 w-[360px] h-[360px] sm:w-[460px] sm:h-[460px] rounded-full blur-[140px] ambient-glow-left transition-all duration-500" style="background: radial-gradient(circle, rgba(var(--accent-rgb), 0.28) 0%, transparent 70%);"></div>
 
     <!-- Bottom-Left Decorative Sphere Glow -->
-    <div id="ambientBottomGlow" class="absolute bottom-[-8%] left-[8%] w-[360px] h-[360px] sm:w-[460px] sm:h-[460px] rounded-full blur-[110px] ambient-glow-bottom transition-all duration-500" style="background: radial-gradient(circle, rgba(var(--accent-rgb), 0.35) 0%, transparent 70%);"></div>
+    <div id="ambientBottomGlow" class="absolute bottom-[-8%] left-[8%] w-[300px] h-[300px] sm:w-[380px] sm:h-[380px] rounded-full blur-[110px] ambient-glow-bottom transition-all duration-500" style="background: radial-gradient(circle, rgba(var(--accent-rgb), 0.35) 0%, transparent 70%);"></div>
 
     <!-- Center Depth Subtle Gradient Mesh -->
-    <div id="ambientCenterGlow" class="absolute top-1/3 left-1/3 w-[520px] h-[520px] rounded-full blur-[160px] transition-all duration-500" style="background: rgba(var(--accent-rgb), 0.12);"></div>
+    <div id="ambientCenterGlow" class="absolute top-1/3 left-1/3 w-[460px] h-[460px] rounded-full blur-[160px] transition-all duration-500" style="background: rgba(var(--accent-rgb), 0.12);"></div>
 
     <!-- Film Vignette Mask to keep editorial edges crisp and legible -->
     <div class="absolute inset-0 bg-radial from-transparent via-transparent to-[#1B191A]/60 mix-blend-multiply"></div>
   </div>
 
   <!-- ==================== HEADER / NAV BAR ==================== -->
-  <header class="relative z-30 flex items-center justify-between px-8 md:px-16 pt-8 pb-4">
+  <header class="relative z-30 flex items-center justify-between px-6 sm:px-10 md:px-14 lg:px-16 pt-3 sm:pt-4 md:pt-5 pb-1.5 sm:pb-2.5 shrink-0">
     <!-- Logo with geometric colored slashes -->
-    <div class="flex items-center space-x-4 cursor-pointer group" id="logoBtn">
+    <div class="flex items-center space-x-3.5 cursor-pointer group" id="logoBtn">
       <div class="flex space-x-1 items-center">
-        <div class="w-1.5 h-6 rounded-sm transform -skew-x-12 theme-transition" style="background-color: var(--accent-primary);"></div>
-        <div class="w-1.5 h-6 rounded-sm transform -skew-x-12 opacity-80 group-hover:opacity-100 theme-transition" style="background-color: var(--accent-light);"></div>
-        <div class="w-1.5 h-6 rounded-sm transform -skew-x-12 opacity-60 group-hover:opacity-100 theme-transition" style="background-color: var(--accent-glow);"></div>
+        <div class="w-1.5 h-5 sm:h-6 rounded-sm transform -skew-x-12 theme-transition" style="background-color: var(--accent-primary);"></div>
+        <div class="w-1.5 h-5 sm:h-6 rounded-sm transform -skew-x-12 opacity-80 group-hover:opacity-100 theme-transition" style="background-color: var(--accent-light);"></div>
+        <div class="w-1.5 h-5 sm:h-6 rounded-sm transform -skew-x-12 opacity-60 group-hover:opacity-100 theme-transition" style="background-color: var(--accent-glow);"></div>
       </div>
-      <span class="font-bold tracking-widest text-lg font-display uppercase text-offwhite group-hover:text-[var(--accent-light)] theme-transition">IconiWave</span>
+      <span class="font-bold tracking-widest text-base sm:text-lg font-display uppercase text-offwhite group-hover:text-[var(--accent-light)] theme-transition">IconiWave</span>
     </div>
 
     <!-- Navigation Menu (Editorial Style) -->
-    <nav class="hidden lg:flex items-center space-x-8 text-xs font-semibold tracking-widest uppercase text-offwhite-muted">
+    <nav class="hidden lg:flex items-center space-x-7 xl:space-x-8 text-[11px] xl:text-xs font-semibold tracking-widest uppercase text-offwhite-muted">
       <button id="navNowPlaying" class="text-offwhite hover:text-[var(--accent-light)] theme-transition relative py-1 after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-full after:h-[2px]" style="--tw-after-bg: var(--accent-primary);">
         NOW PLAYING
       </button>
@@ -202,49 +216,49 @@
     </nav>
 
     <!-- Right Controls: Theme Switcher & Utility buttons -->
-    <div class="flex items-center space-x-3 md:space-x-4">
+    <div class="flex items-center space-x-2.5 sm:space-x-3.5">
       
       <!-- Minimalist Theme Picker (6 Color Dots) -->
-      <div class="flex items-center space-x-1.5 bg-charcoal-card/90 border border-white/10 px-2.5 py-1.5 rounded-full shadow-inner backdrop-blur-md" id="themePickerContainer">
+      <div class="flex items-center space-x-1.5 bg-charcoal-card/90 border border-white/10 px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-full shadow-inner backdrop-blur-md" id="themePickerContainer">
         <!-- Injected via JavaScript -->
       </div>
 
-      <label for="audioFileInput" class="flex items-center space-x-2 text-xs font-medium bg-charcoal-card hover:bg-white/5 text-offwhite border border-white/10 hover:border-[var(--accent-light)] px-3.5 py-2 rounded-full cursor-pointer theme-transition">
+      <label for="audioFileInput" class="flex items-center space-x-1.5 sm:space-x-2 text-[11px] sm:text-xs font-medium bg-charcoal-card hover:bg-white/5 text-offwhite border border-white/10 hover:border-[var(--accent-light)] px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-full cursor-pointer theme-transition">
         <i data-lucide="upload" class="w-3.5 h-3.5" style="color: var(--accent-light);"></i>
         <span class="hidden sm:inline">Upload Audio</span>
       </label>
       <input type="file" id="audioFileInput" accept="audio/*" class="hidden">
 
-      <button id="modalInfoBtn" class="p-2 text-offwhite-muted hover:text-offwhite hover:bg-white/5 rounded-full transition-colors" title="Settings & About">
+      <button id="modalInfoBtn" class="p-1.5 sm:p-2 text-offwhite-muted hover:text-offwhite hover:bg-white/5 rounded-full transition-colors" title="Settings & About">
         <i data-lucide="info" class="w-4 h-4"></i>
       </button>
     </div>
   </header>
 
   <!-- ==================== HERO MAIN CONTAINER ==================== -->
-  <main class="relative z-10 flex-1 grid grid-cols-1 lg:grid-cols-12 items-center px-8 md:px-16 gap-8 overflow-y-auto lg:overflow-visible">
+  <main class="relative z-10 flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-12 items-center px-6 sm:px-10 md:px-14 lg:px-16 py-1 sm:py-2 md:py-3 gap-5 sm:gap-6 lg:gap-8 xl:gap-12 overflow-y-auto lg:overflow-hidden">
     
     <!-- LEFT COLUMN: Typography, Smooth Real-time Waveform & Audio Controls -->
-    <section class="lg:col-span-6 flex flex-col justify-center space-y-6 lg:pr-6 z-20">
+    <section class="lg:col-span-6 flex flex-col justify-center space-y-3 sm:space-y-4 md:space-y-4.5 xl:space-y-5 lg:pr-2 xl:pr-6 z-20">
       
       <!-- Subtitle badge -->
-      <div class="flex items-center space-x-3">
-        <span class="inline-block w-2 h-2 rounded-full animate-ping theme-transition" style="background-color: var(--accent-primary);"></span>
-        <p id="trackCategory" class="text-xs tracking-[0.25em] uppercase font-bold text-offwhite-muted">
+      <div class="flex items-center space-x-2.5">
+        <span class="inline-block w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full animate-ping theme-transition" style="background-color: var(--accent-primary);"></span>
+        <p id="trackCategory" class="text-[10px] sm:text-[11px] md:text-xs tracking-[0.22em] uppercase font-bold text-offwhite-muted">
           OUR VERSION • EXPERIENCE 01
         </p>
       </div>
 
-      <!-- Massive Track Title (Reference Design style) -->
-      <div class="space-y-1">
-        <h1 id="trackTitle" class="text-5xl md:text-7xl lg:text-8xl font-black font-display tracking-tight text-offwhite uppercase leading-none">
+      <!-- Massive Track Title (Reference Design style - Fluid scalable font) -->
+      <div class="space-y-0.5">
+        <h1 id="trackTitle" class="text-4xl sm:text-5xl md:text-6xl lg:text-6xl xl:text-7xl 2xl:text-8xl font-black font-display tracking-tight text-offwhite uppercase leading-none">
           DESIGN
         </h1>
       </div>
 
       <!-- REAL-TIME SMOOTH WAVEFORM CANVAS (Directly between Title and Artist) -->
-      <div class="relative w-full bg-charcoal-card/60 backdrop-blur-md rounded-2xl border border-white/5 p-4 shadow-2xl overflow-hidden group">
-        <div class="flex items-center justify-between text-[11px] font-mono text-offwhite-dim uppercase tracking-wider mb-2">
+      <div class="relative w-full bg-charcoal-card/60 backdrop-blur-md rounded-2xl border border-white/5 p-2.5 sm:p-3 md:p-3.5 shadow-2xl overflow-hidden group">
+        <div class="flex items-center justify-between text-[10px] sm:text-[11px] font-mono text-offwhite-dim uppercase tracking-wider mb-1.5 sm:mb-2">
           <div class="flex items-center space-x-2">
             <span class="w-1.5 h-1.5 rounded-full theme-transition" style="background-color: var(--accent-primary);"></span>
             <span id="canvasModeLabel">Real-time Spectral Waveform</span>
@@ -257,79 +271,79 @@
           </div>
         </div>
 
-        <!-- Canvas for Audio Visualizer -->
-        <canvas id="waveformCanvas" class="w-full h-24 md:h-28 rounded-lg cursor-pointer" width="700" height="120"></canvas>
+        <!-- Canvas for Audio Visualizer (Fluid adaptive height) -->
+        <canvas id="waveformCanvas" class="w-full h-18 sm:h-20 md:h-22 lg:h-24 rounded-lg cursor-pointer" width="700" height="110"></canvas>
         
         <!-- Glow reflection inside canvas box -->
         <div id="canvasGlowReflection" class="absolute -bottom-6 left-1/2 transform -translate-x-1/2 w-3/4 h-8 blur-xl pointer-events-none theme-transition" style="background-color: rgba(var(--accent-glow-rgb), 0.35);"></div>
       </div>
 
       <!-- Artist & Editorial Description -->
-      <div class="space-y-2 max-w-xl">
-        <p id="trackArtist" class="text-sm font-semibold uppercase tracking-wider theme-transition" style="color: var(--accent-light);">
+      <div class="space-y-1 sm:space-y-1.5 max-w-xl">
+        <p id="trackArtist" class="text-xs sm:text-sm font-semibold uppercase tracking-wider theme-transition" style="color: var(--accent-light);">
           Sculpted by IconiWave Sound Lab
         </p>
-        <p id="trackDescription" class="text-offwhite-muted text-sm md:text-base font-normal leading-relaxed">
+        <p id="trackDescription" class="text-offwhite-muted text-xs sm:text-sm md:text-[14px] font-normal leading-relaxed line-clamp-2 md:line-clamp-3">
           Our audio engine crafts a modern and soothing resonance, creating the key to deep immersion, ambient mindfulness, and emotional focus.
         </p>
       </div>
 
       <!-- Interactive Controls (Circular Play/Pause button inspired by "See More" in Ref) -->
-      <div class="flex flex-wrap items-center gap-6 pt-2">
+      <div class="flex flex-wrap items-center gap-3 sm:gap-4 md:gap-4.5 pt-0.5 sm:pt-1">
         <!-- Main circular Play / Pause Button with aura border -->
-        <button id="mainPlayBtn" class="flex items-center space-x-4 group cursor-pointer">
-          <div id="playBtnCircle" class="relative flex items-center justify-center w-14 h-14 rounded-full border border-offwhite/30 transition-all duration-300 shadow-lg group-hover:border-[var(--accent-primary)] group-hover:bg-[var(--accent-primary)] group-hover:shadow-[0_0_35px_rgba(var(--accent-glow-rgb),0.85),0_0_15px_rgba(var(--accent-rgb),0.6)]">
+        <button id="mainPlayBtn" class="flex items-center space-x-3 sm:space-x-3.5 group cursor-pointer">
+          <div id="playBtnCircle" class="relative flex items-center justify-center w-11 h-11 sm:w-12 sm:h-12 md:w-13 md:h-13 rounded-full border border-offwhite/30 transition-all duration-300 shadow-lg group-hover:border-[var(--accent-primary)] group-hover:bg-[var(--accent-primary)] group-hover:shadow-[0_0_30px_rgba(var(--accent-glow-rgb),0.85),0_0_15px_rgba(var(--accent-rgb),0.6)]">
             <div id="playIconContainer" class="text-offwhite group-hover:text-white transition-colors transform group-hover:scale-110">
-              <i data-lucide="play" class="w-5 h-5 ml-0.5 fill-current"></i>
+              <i data-lucide="play" class="w-4 h-4 sm:w-5 sm:h-5 ml-0.5 fill-current"></i>
             </div>
             <!-- Ripple aura ring -->
             <div id="playRing" class="absolute inset-0 rounded-full border opacity-0 group-hover:opacity-100 animate-ping pointer-events-none" style="border-color: var(--accent-primary);"></div>
           </div>
-          <span id="playButtonText" class="text-sm font-bold uppercase tracking-widest text-offwhite group-hover:text-[var(--accent-light)] transition-colors">
+          <span id="playButtonText" class="text-xs sm:text-sm font-bold uppercase tracking-widest text-offwhite group-hover:text-[var(--accent-light)] transition-colors">
             Play Experience
           </span>
         </button>
 
         <!-- Preset Switcher (Next / Prev) -->
-        <div class="flex items-center space-x-2 bg-charcoal-card border border-white/10 rounded-full px-3 py-1.5">
-          <button id="prevTrackBtn" class="p-1.5 text-offwhite-muted hover:text-offwhite hover:bg-white/5 rounded-full transition-colors" title="Previous Preset">
-            <i data-lucide="skip-back" class="w-4 h-4"></i>
+        <div class="flex items-center space-x-1.5 sm:space-x-2 bg-charcoal-card border border-white/10 rounded-full px-2.5 py-1.5">
+          <button id="prevTrackBtn" class="p-1 sm:p-1.5 text-offwhite-muted hover:text-offwhite hover:bg-white/5 rounded-full transition-colors" title="Previous Preset">
+            <i data-lucide="skip-back" class="w-3.5 h-3.5"></i>
           </button>
-          <span id="presetIndicator" class="text-xs font-mono font-medium px-2 text-offwhite">01 / 03</span>
-          <button id="nextTrackBtn" class="p-1.5 text-offwhite-muted hover:text-offwhite hover:bg-white/5 rounded-full transition-colors" title="Next Preset">
-            <i data-lucide="skip-forward" class="w-4 h-4"></i>
+          <span id="presetIndicator" class="text-[11px] sm:text-xs font-mono font-medium px-1.5 text-offwhite">01 / 03</span>
+          <button id="nextTrackBtn" class="p-1 sm:p-1.5 text-offwhite-muted hover:text-offwhite hover:bg-white/5 rounded-full transition-colors" title="Next Preset">
+            <i data-lucide="skip-forward" class="w-3.5 h-3.5"></i>
           </button>
         </div>
 
         <!-- Volume Control Slider -->
-        <div class="flex items-center space-x-2 bg-charcoal-card border border-white/10 rounded-full px-3.5 py-2">
+        <div class="flex items-center space-x-2 bg-charcoal-card border border-white/10 rounded-full px-3 py-1.5 sm:py-2">
           <button id="muteBtn" class="text-offwhite-muted hover:text-offwhite transition-colors">
-            <i data-lucide="volume-2" id="volumeIcon" class="w-4 h-4"></i>
+            <i data-lucide="volume-2" id="volumeIcon" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
           </button>
-          <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="0.75" class="w-20 cursor-pointer">
+          <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="0.75" class="w-16 sm:w-20 cursor-pointer">
         </div>
 
         <!-- Sound FX / Filter toggle button -->
-        <button id="fxLoFiBtn" class="flex items-center space-x-1.5 text-xs font-semibold px-3.5 py-2 rounded-full border border-white/10 bg-charcoal-card hover:border-[var(--accent-primary)] text-offwhite-muted hover:text-offwhite transition-all">
+        <button id="fxLoFiBtn" class="flex items-center space-x-1.5 text-[11px] sm:text-xs font-semibold px-3 py-1.5 sm:py-2 rounded-full border border-white/10 bg-charcoal-card hover:border-[var(--accent-primary)] text-offwhite-muted hover:text-offwhite transition-all">
           <i data-lucide="disc" class="w-3.5 h-3.5 theme-transition" style="color: var(--accent-primary);"></i>
-          <span>Lo-Fi Mode: <span id="fxStatus" class="font-mono theme-transition" style="color: var(--accent-primary);">OFF</span></span>
+          <span>Lo-Fi: <span id="fxStatus" class="font-mono theme-transition" style="color: var(--accent-primary);">OFF</span></span>
         </button>
       </div>
 
     </section>
 
-    <!-- RIGHT COLUMN: Iconic Terracotta Circle & Sculpture / Artwork Graphic (From Reference) -->
-    <section class="lg:col-span-6 relative flex items-center justify-center min-h-[380px] lg:min-h-[500px]">
+    <!-- RIGHT COLUMN: Iconic Terracotta Circle & Sculpture / Artwork Graphic (Fluid Dynamic Heights) -->
+    <section class="lg:col-span-6 relative flex items-center justify-center h-full max-h-[48vh] sm:max-h-[54vh] md:max-h-[58vh] lg:max-h-[62vh] min-h-[220px] sm:min-h-[280px] lg:min-h-0">
       
-      <!-- Big Accent Circle (The defining design element from Reference 1) -->
-      <div id="bigCircle" class="absolute w-[320px] h-[320px] sm:w-[420px] sm:h-[420px] lg:w-[480px] lg:h-[480px] rounded-full flex items-center justify-center transition-all duration-700 animate-orb" style="background: linear-gradient(135deg, var(--accent-light), var(--accent-primary), var(--accent-dark)); box-shadow: 0 0 50px rgba(var(--accent-glow-rgb), 0.65), 0 0 140px rgba(var(--accent-rgb), 0.55);">
+      <!-- Big Accent Circle (The defining design element from Reference 1 - Viewport Aware) -->
+      <div id="bigCircle" class="absolute w-[min(340px,36vh)] h-[min(340px,36vh)] sm:w-[min(380px,42vh)] sm:h-[min(380px,42vh)] lg:w-[min(430px,46vh)] lg:h-[min(430px,46vh)] xl:w-[450px] xl:h-[450px] rounded-full flex items-center justify-center transition-all duration-700 animate-orb" style="background: linear-gradient(135deg, var(--accent-light), var(--accent-primary), var(--accent-dark)); box-shadow: 0 0 50px rgba(var(--accent-glow-rgb), 0.65), 0 0 140px rgba(var(--accent-rgb), 0.55);">
       </div>
 
       <!-- Foreground Sculpture / Artwork Image with Duotone Blend -->
       <div class="relative z-10 flex flex-col items-center group">
         
-        <!-- Artwork frame with subtle floating animation -->
-        <div class="relative w-[280px] h-[340px] sm:w-[360px] sm:h-[440px] lg:w-[420px] lg:h-[500px] flex items-center justify-center animate-float">
+        <!-- Artwork frame with subtle floating animation (Clamped to viewport height) -->
+        <div class="relative w-[min(260px,32vh)] h-[min(320px,40vh)] sm:w-[min(310px,38vh)] sm:h-[min(380px,46vh)] lg:w-[min(360px,44vh)] lg:h-[min(430px,50vh)] xl:w-[390px] xl:h-[460px] flex items-center justify-center animate-float">
           
           <img id="artworkImage" 
                src="https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=900&q=80" 
@@ -340,14 +354,14 @@
           <div id="duotoneOverlay" class="absolute inset-0 mix-blend-color pointer-events-none rounded-2xl theme-transition" style="background-color: rgba(var(--accent-rgb), 0.2);"></div>
 
           <!-- Quick artwork change button overlay -->
-          <div class="absolute bottom-4 right-4 flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <label for="imageFileInput" class="p-2.5 bg-charcoal/90 hover:bg-[var(--accent-primary)] border border-white/20 rounded-full cursor-pointer shadow-lg transition-all" title="Upload Custom Artwork">
-              <i data-lucide="image" class="w-4 h-4 text-offwhite"></i>
+          <div class="absolute bottom-3 right-3 sm:bottom-4 sm:right-4 flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <label for="imageFileInput" class="p-2 sm:p-2.5 bg-charcoal/90 hover:bg-[var(--accent-primary)] border border-white/20 rounded-full cursor-pointer shadow-lg transition-all" title="Upload Custom Artwork">
+              <i data-lucide="image" class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-offwhite"></i>
             </label>
             <input type="file" id="imageFileInput" accept="image/*" class="hidden">
 
-            <button id="changeArtworkPresetBtn" class="p-2.5 bg-charcoal/90 hover:bg-[var(--accent-primary)] border border-white/20 rounded-full cursor-pointer shadow-lg transition-all" title="Random Preset Artwork">
-              <i data-lucide="refresh-cw" class="w-4 h-4 text-offwhite"></i>
+            <button id="changeArtworkPresetBtn" class="p-2 sm:p-2.5 bg-charcoal/90 hover:bg-[var(--accent-primary)] border border-white/20 rounded-full cursor-pointer shadow-lg transition-all" title="Random Preset Artwork">
+              <i data-lucide="refresh-cw" class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-offwhite"></i>
             </button>
           </div>
         </div>
@@ -355,21 +369,21 @@
       </div>
 
       <!-- Small Floating Accent Sphere at the bottom left (matches the small circle in reference image 1) -->
-      <div id="smallSphere" class="absolute bottom-0 left-4 sm:left-12 w-20 h-20 sm:w-28 sm:h-28 rounded-full z-20 pointer-events-none transform -translate-y-4 animate-bounce theme-transition" style="background: linear-gradient(to top, var(--accent-dark), var(--accent-primary)); box-shadow: 0 0 25px rgba(var(--accent-glow-rgb), 0.85), 0 10px 40px rgba(var(--accent-rgb), 0.65); animation-duration: 4s;"></div>
+      <div id="smallSphere" class="absolute bottom-0 left-2 sm:left-6 md:left-8 w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 lg:w-[min(84px,11vh)] lg:h-[min(84px,11vh)] rounded-full z-20 pointer-events-none transform -translate-y-2 sm:-translate-y-4 animate-bounce theme-transition" style="background: linear-gradient(to top, var(--accent-dark), var(--accent-primary)); box-shadow: 0 0 25px rgba(var(--accent-glow-rgb), 0.85), 0 10px 40px rgba(var(--accent-rgb), 0.65); animation-duration: 4s;"></div>
 
     </section>
 
   </main>
 
   <!-- ==================== BOTTOM BAR / PROGRESS SCRUBBER ==================== -->
-  <footer class="relative z-30 px-8 md:px-16 py-6 flex flex-col md:flex-row items-center justify-between gap-4 border-t border-white/5 bg-[#1B191A]/90 backdrop-blur-md">
+  <footer class="relative z-30 px-6 sm:px-10 md:px-14 lg:px-16 py-2.5 sm:py-3.5 md:py-4 flex flex-col sm:flex-row items-center justify-between gap-2.5 sm:gap-4 border-t border-white/5 bg-[#1B191A]/90 backdrop-blur-md shrink-0">
     
     <!-- Progress Indicator styled as "01 ────────── 03" as seen in the reference photo -->
-    <div class="flex items-center space-x-4 w-full max-w-md">
+    <div class="flex items-center space-x-3 sm:space-x-4 w-full max-w-md">
       <span id="footerCurrentIndex" class="text-xs font-mono font-bold text-offwhite tracking-widest">01</span>
       
       <!-- Interactive Scrubber Bar with Scrub / Drag & Hover Preview -->
-      <div id="progressBarContainer" class="relative flex-1 py-3 cursor-pointer group select-none flex items-center">
+      <div id="progressBarContainer" class="relative flex-1 py-2 sm:py-3 cursor-pointer group select-none flex items-center">
         <!-- Background Track -->
         <div class="h-1.5 w-full bg-charcoal-card rounded-full relative overflow-hidden">
           <!-- Hover preview shadow bar -->
@@ -387,7 +401,7 @@
     </div>
 
     <!-- Time & Engine Status -->
-    <div class="flex items-center space-x-6 text-xs font-mono text-offwhite-dim">
+    <div class="flex items-center space-x-4 sm:space-x-6 text-[11px] sm:text-xs font-mono text-offwhite-dim">
       <div class="flex items-center space-x-2">
         <span id="currentTimeDisplay">00:00</span>
         <span>/</span>
