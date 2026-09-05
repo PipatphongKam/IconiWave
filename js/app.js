@@ -101,7 +101,7 @@ function applyTheme(themeId) {
     duotoneOverlay.style.backgroundColor = `rgba(${currentTheme.rgb}, 0.2)`;
   }
 
-  // Update Ambient Background Glows with High Vibrancy
+  // Update Ambient Background Glows
   const heroGlow = document.getElementById('ambientHeroGlow');
   if (heroGlow) {
     heroGlow.style.background = `radial-gradient(circle, rgba(${currentTheme.rgb}, 0.45) 0%, rgba(${currentTheme.glowRgb}, 0.30) 45%, transparent 70%)`;
@@ -160,8 +160,6 @@ function initThemePicker() {
     container.appendChild(btn);
   });
 }
-
-// Initialize Theme Picker
 initThemePicker();
 
 // ==========================================
@@ -200,6 +198,17 @@ const TRACK_PRESETS = [
     synthScale: [196.00, 246.94, 293.66, 392.00, 493.88, 587.33], // G major 9
     bpm: 72,
     chordRoot: 'Gmaj9'
+  },
+  {
+    id: '04',
+    title: 'ROSA VELVET',
+    category: 'ROMANTIC NOCTURNE • OPUS 1902',
+    artist: 'AudiWave Orchestral Waltz',
+    description: 'A delicate 3/4 vintage waltz featuring warm acoustic upright bass, antique felt piano, celesta music box, and subtle vinyl dust.',
+    artwork: 'assets/skin_vintage_rose.jpg',
+    synthScale: [261.63, 329.63, 392.00, 493.88, 523.25, 659.25], // Cmaj7 / romantic waltz
+    bpm: 84,
+    chordRoot: 'Cmaj7'
   }
 ];
 
@@ -207,11 +216,14 @@ let currentTrackIndex = 0;
 let isPlaying = false;
 let isCustomAudio = false;
 let isLofiEnabled = false;
-let visualizerModeIndex = 0; // 0: Smooth Wave, 1: Minimal Bars, 2: Circular Aura
+let visualizerModeIndex = 0; // 0: Smooth Wave, 1: Minimal Bars, 2: Pulse Ribbon
 const VISUALIZER_MODES = ['Smooth Wave', 'Minimal Bars', 'Pulse Ribbon'];
 
+// Active Skin State: 'classic' | 'cdDeck'
+let activeSkin = 'classic';
+
 // ==========================================
-// 2. WEB AUDIO API & GENERATIVE SYNTH ENGINE
+// 2. WEB AUDIO API & GENERATIVE ENGINE
 // ==========================================
 let audioCtx = null;
 let analyserNode = null;
@@ -228,21 +240,18 @@ function initAudioContext() {
     const AudioContextClass = window.AudioContext || window.webkitAudioContext;
     audioCtx = new AudioContextClass();
 
-    // Analyser Node (placed BEFORE masterGain to decouple visualizer from volume)
     analyserNode = audioCtx.createAnalyser();
     analyserNode.fftSize = 512;
     analyserNode.smoothingTimeConstant = 0.76;
 
-    // Master Gain (Controls output volume only)
     masterGain = audioCtx.createGain();
-    masterGain.gain.setValueAtTime(parseFloat(document.getElementById('volumeSlider').value), audioCtx.currentTime);
+    const currentVol = parseFloat(document.getElementById('volumeSlider').value);
+    masterGain.gain.setValueAtTime(currentVol, audioCtx.currentTime);
 
-    // Lo-fi Biquad Filter (Lowpass)
     lofiFilterNode = audioCtx.createBiquadFilter();
     lofiFilterNode.type = 'lowpass';
-    lofiFilterNode.frequency.setValueAtTime(20000, audioCtx.currentTime); // Default wide open
+    lofiFilterNode.frequency.setValueAtTime(20000, audioCtx.currentTime);
 
-    // Connect chain: Sources -> lofiFilter -> analyserNode -> masterGain -> destination
     lofiFilterNode.connect(analyserNode);
     analyserNode.connect(masterGain);
     masterGain.connect(audioCtx.destination);
@@ -270,10 +279,8 @@ function triggerAmbientSynthVoice() {
   const gain1 = audioCtx.createGain();
   osc1.type = 'triangle';
   osc1.frequency.setValueAtTime(freq1, now);
-  // Detune slightly for lush chorus
   osc1.detune.setValueAtTime((Math.random() - 0.5) * 15, now);
 
-  // Envelope ADSR
   gain1.gain.setValueAtTime(0.001, now);
   gain1.gain.exponentialRampToValueAtTime(0.08, now + 1.8);
   gain1.gain.exponentialRampToValueAtTime(0.0001, now + duration);
@@ -301,7 +308,6 @@ function triggerAmbientSynthVoice() {
   osc2.start(now);
   osc2.stop(now + duration * 1.2 + 0.1);
 
-  // Trigger next chord slice based on BPM
   const intervalMs = (60 / track.bpm) * 1500 + Math.random() * 800;
   synthTimer = setTimeout(triggerAmbientSynthVoice, intervalMs);
 }
@@ -312,7 +318,7 @@ function startSubBassDrone() {
   stopSubBassDrone();
 
   const track = TRACK_PRESETS[currentTrackIndex];
-  const baseFreq = track.synthScale[0] / 2; // Sub octave
+  const baseFreq = track.synthScale[0] / 2;
 
   synthBassOsc = audioCtx.createOscillator();
   synthBassGain = audioCtx.createGain();
@@ -346,8 +352,99 @@ function stopSubBassDrone() {
   }
 }
 
-// Timeline state for synth presets
-let synthTrackDuration = 180; // 3 minutes virtual track for each preset
+// Mechanical Sound Effects for AudiWave Retro Player
+function playSnapSound() {
+  initAudioContext();
+  if (!audioCtx) return;
+  const now = audioCtx.currentTime;
+
+  const osc1 = audioCtx.createOscillator();
+  const g1 = audioCtx.createGain();
+  osc1.type = 'triangle';
+  osc1.frequency.setValueAtTime(2200, now);
+  osc1.frequency.exponentialRampToValueAtTime(180, now + 0.04);
+  g1.gain.setValueAtTime(0.9, now);
+  g1.gain.exponentialRampToValueAtTime(0.001, now + 0.045);
+  osc1.connect(g1);
+  g1.connect(audioCtx.destination);
+  osc1.start(now);
+  osc1.stop(now + 0.05);
+
+  const osc2 = audioCtx.createOscillator();
+  const g2 = audioCtx.createGain();
+  osc2.type = 'sine';
+  osc2.frequency.setValueAtTime(320, now);
+  osc2.frequency.exponentialRampToValueAtTime(60, now + 0.06);
+  g2.gain.setValueAtTime(0.8, now);
+  g2.gain.exponentialRampToValueAtTime(0.001, now + 0.07);
+  osc2.connect(g2);
+  g2.connect(audioCtx.destination);
+  osc2.start(now);
+  osc2.stop(now + 0.08);
+}
+
+function playEjectSound() {
+  initAudioContext();
+  if (!audioCtx) return;
+  const now = audioCtx.currentTime;
+
+  const osc = audioCtx.createOscillator();
+  const g = audioCtx.createGain();
+  osc.type = 'sawtooth';
+  osc.frequency.setValueAtTime(340, now);
+  osc.frequency.exponentialRampToValueAtTime(120, now + 0.12);
+
+  g.gain.setValueAtTime(0.5, now);
+  g.gain.exponentialRampToValueAtTime(0.001, now + 0.13);
+
+  osc.connect(g);
+  g.connect(audioCtx.destination);
+  osc.start(now);
+  osc.stop(now + 0.14);
+}
+
+function playLaserSeekSound() {
+  initAudioContext();
+  if (!audioCtx) return;
+  const now = audioCtx.currentTime;
+
+  for (let i = 0; i < 3; i++) {
+    const osc = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(700 + i * 350, now + i * 0.05);
+    osc.frequency.exponentialRampToValueAtTime(1800, now + i * 0.05 + 0.035);
+
+    g.gain.setValueAtTime(0.1, now + i * 0.05);
+    g.gain.exponentialRampToValueAtTime(0.001, now + i * 0.05 + 0.04);
+
+    osc.connect(g);
+    g.connect(audioCtx.destination);
+    osc.start(now + i * 0.05);
+    osc.stop(now + i * 0.05 + 0.045);
+  }
+}
+
+function playBeep(freq = 900, duration = 0.06) {
+  initAudioContext();
+  if (!audioCtx) return;
+  const now = audioCtx.currentTime;
+  const osc = audioCtx.createOscillator();
+  const g = audioCtx.createGain();
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(freq, now);
+
+  g.gain.setValueAtTime(0.2, now);
+  g.gain.exponentialRampToValueAtTime(0.001, now + duration);
+
+  osc.connect(g);
+  g.connect(audioCtx.destination);
+  osc.start(now);
+  osc.stop(now + duration + 0.01);
+}
+
+// Timeline state
+let synthTrackDuration = 180;
 let synthCurrentTime = 0;
 let synthClockInterval = null;
 
@@ -364,6 +461,7 @@ function updateTimelineUI(currentTime, duration) {
   const validCur = Math.min(currentTime || 0, validDur);
   const progressPct = (validCur / validDur) * 100;
 
+  // Update Classic UI
   const progressBarFill = document.getElementById('progressBarFill');
   const progressBarThumb = document.getElementById('progressBarThumb');
   const currentTimeDisplay = document.getElementById('currentTimeDisplay');
@@ -373,6 +471,12 @@ function updateTimelineUI(currentTime, duration) {
   if (progressBarThumb) progressBarThumb.style.left = `${progressPct}%`;
   if (currentTimeDisplay) currentTimeDisplay.textContent = formatTime(validCur);
   if (durationDisplay) durationDisplay.textContent = formatTime(validDur);
+
+  // Update AudiWave CD Deck LCD UI
+  const lcdTimeCounter = document.getElementById('lcdTimeCounter');
+  const lcdProgressBarFill = document.getElementById('lcdProgressBarFill');
+  if (lcdTimeCounter) lcdTimeCounter.textContent = formatTime(validCur);
+  if (lcdProgressBarFill) lcdProgressBarFill.style.width = `${progressPct}%`;
 }
 
 function startAudioPlayback() {
@@ -381,14 +485,15 @@ function startAudioPlayback() {
   updatePlayButtonUI(true);
 
   if (isCustomAudio && customAudioElement) {
-    customAudioElement.play();
-    document.getElementById('engineStatusBadge').textContent = 'Custom Audio Playing';
+    customAudioElement.play().catch(e => console.log('Playback:', e));
+    const badge = document.getElementById('engineStatusBadge');
+    if (badge) badge.textContent = 'Custom Audio Playing';
   } else {
     triggerAmbientSynthVoice();
     startSubBassDrone();
-    document.getElementById('engineStatusBadge').textContent = 'Generative Synth Active';
+    const badge = document.getElementById('engineStatusBadge');
+    if (badge) badge.textContent = 'Generative Synth Active';
 
-    // Start virtual clock for synth
     if (synthClockInterval) clearInterval(synthClockInterval);
     synthClockInterval = setInterval(() => {
       if (!isPlaying || isCustomAudio) return;
@@ -400,6 +505,8 @@ function startAudioPlayback() {
       updateTimelineUI(synthCurrentTime, synthTrackDuration);
     }, 500);
   }
+
+  syncAudiWaveDeckPlayback(true);
 }
 
 function pauseAudioPlayback() {
@@ -419,7 +526,10 @@ function pauseAudioPlayback() {
   if (isCustomAudio && customAudioElement) {
     customAudioElement.pause();
   }
-  document.getElementById('engineStatusBadge').textContent = 'Playback Paused';
+  const badge = document.getElementById('engineStatusBadge');
+  if (badge) badge.textContent = 'Playback Paused';
+
+  syncAudiWaveDeckPlayback(false);
 }
 
 function togglePlay() {
@@ -431,35 +541,40 @@ function togglePlay() {
 }
 
 function updatePlayButtonUI(playing) {
+  // Classic Button
   const playIconContainer = document.getElementById('playIconContainer');
   const playButtonText = document.getElementById('playButtonText');
   const playRing = document.getElementById('playRing');
   const bigCircle = document.getElementById('bigCircle');
 
   if (playing) {
-    playIconContainer.innerHTML = '<i data-lucide="pause" class="w-5 h-5 fill-current"></i>';
-    playButtonText.textContent = 'Pause Experience';
-    playRing.classList.remove('opacity-0');
-    playRing.classList.add('opacity-100');
-    bigCircle.style.transform = 'scale(1.05)';
+    if (playIconContainer) playIconContainer.innerHTML = '<i data-lucide="pause" class="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-current"></i>';
+    if (playButtonText) playButtonText.textContent = 'Pause Experience';
+    if (playRing) {
+      playRing.classList.remove('opacity-0');
+      playRing.classList.add('opacity-100');
+    }
+    if (bigCircle) bigCircle.style.transform = 'scale(1.05)';
   } else {
-    playIconContainer.innerHTML = '<i data-lucide="play" class="w-5 h-5 ml-0.5 fill-current"></i>';
-    playButtonText.textContent = 'Play Experience';
-    playRing.classList.remove('opacity-100');
-    playRing.classList.add('opacity-0');
-    bigCircle.style.transform = 'scale(1)';
+    if (playIconContainer) playIconContainer.innerHTML = '<i data-lucide="play" class="w-3.5 h-3.5 sm:w-4 sm:h-4 ml-0.5 fill-current"></i>';
+    if (playButtonText) playButtonText.textContent = 'Play Experience';
+    if (playRing) {
+      playRing.classList.remove('opacity-100');
+      playRing.classList.add('opacity-0');
+    }
+    if (bigCircle) bigCircle.style.transform = 'scale(1)';
   }
   lucide.createIcons();
 }
 
 // ==========================================
-// 3. CANVAS REAL-TIME VISUALIZER
+// 3. CANVAS REAL-TIME VISUALIZER (CLASSIC)
 // ==========================================
 const canvas = document.getElementById('waveformCanvas');
 const ctx = canvas.getContext('2d');
 
-// Handle high-DPI displays
 function resizeCanvas() {
+  if (!canvas) return;
   const rect = canvas.getBoundingClientRect();
   canvas.width = rect.width * window.devicePixelRatio || 700;
   canvas.height = rect.height * window.devicePixelRatio || 120;
@@ -468,19 +583,16 @@ window.addEventListener('resize', resizeCanvas);
 resizeCanvas();
 
 let visualizerAngle = 0;
-
-// Persistent smoothing buffers for Pulse Ribbon (Lerp Dampening)
 let ribbonSmoothedEnergy = 0;
 let ribbonSmoothedBass = 0;
 let ribbonSmoothedFreqs = new Float32Array(64);
 
 function renderVisualizer() {
   requestAnimationFrame(renderVisualizer);
+  if (!canvas || activeSkin !== 'classic') return;
 
   const width = canvas.width;
   const height = canvas.height;
-
-  // Clear canvas with smooth visualizer backdrop
   ctx.clearRect(0, 0, width, height);
 
   let bufferLength = analyserNode ? analyserNode.frequencyBinCount : 128;
@@ -498,7 +610,6 @@ function renderVisualizer() {
     overallEnergy = sum / (Math.min(bufferLength, 64) * 255);
   }
 
-  // Modulate ambient hero background glow smoothly with audio energy (Apple Music vibe)
   const ambientHeroGlow = document.getElementById('ambientHeroGlow');
   if (ambientHeroGlow) {
     if (isReceivingSignal) {
@@ -513,11 +624,10 @@ function renderVisualizer() {
     }
   }
 
-  // Smooth time angle increment for ambient physics
   visualizerAngle += isReceivingSignal ? (0.04 + overallEnergy * 0.05) : 0.025;
 
   if (visualizerModeIndex === 0) {
-    // MODE 0: Enhanced Smooth Liquid Waveform (Double-Pass Neon Bloom + Crisp Core)
+    // Mode 0: Smooth Liquid Waveform
     const points = 36;
     const sliceWidth = width / (points - 1);
     const wavePoints = [];
@@ -526,14 +636,11 @@ function renderVisualizer() {
       const x = i * sliceWidth;
       let audioVal = 0;
       if (isReceivingSignal) {
-        // Sample frequency band with gentle curvature & boost
         const freqIdx = Math.floor((i / points) * 48);
         const rawVal = dataArray[freqIdx] / 255;
-        // Enhanced dynamic amplitude scaling (power curve for punchy reactivity)
         const boostedVal = Math.pow(rawVal, 0.82) * 1.35;
         audioVal = boostedVal * (height * 0.44);
       } else {
-        // Idle ambient breathing wave
         audioVal = Math.sin(visualizerAngle + i * 0.35) * (height * 0.14);
       }
 
@@ -542,7 +649,6 @@ function renderVisualizer() {
       wavePoints.push({ x, y });
     }
 
-    // Draw soft ambient gradient fill under wave
     ctx.save();
     ctx.beginPath();
     ctx.moveTo(0, height);
@@ -564,7 +670,7 @@ function renderVisualizer() {
     ctx.fill();
     ctx.restore();
 
-    // Pass 1: Wide Radiant Neon Bloom Aura (Bloom Pass)
+    // Pass 1: Neon Bloom
     ctx.save();
     ctx.beginPath();
     ctx.lineWidth = 7 * window.devicePixelRatio;
@@ -584,7 +690,7 @@ function renderVisualizer() {
     ctx.stroke();
     ctx.restore();
 
-    // Pass 2: Crisp Core & Glowing Center Stroke (Core Pass)
+    // Pass 2: Core line
     ctx.save();
     ctx.beginPath();
     ctx.lineWidth = 2.8 * window.devicePixelRatio;
@@ -610,31 +716,8 @@ function renderVisualizer() {
     ctx.stroke();
     ctx.restore();
 
-    // Secondary subtle counter-wave with ethereal white glow
-    ctx.save();
-    ctx.beginPath();
-    ctx.lineWidth = 1.6 * window.devicePixelRatio;
-    ctx.shadowBlur = 10 * window.devicePixelRatio;
-    ctx.shadowColor = 'rgba(233, 228, 224, 0.6)';
-    ctx.strokeStyle = 'rgba(233, 228, 224, 0.55)';
-    for (let i = 0; i < points; i++) {
-      const x = i * sliceWidth;
-      let audioVal = isReceivingSignal ? (dataArray[(i * 2) % 36] / 255) * (height * 0.28) : Math.cos(visualizerAngle + i * 0.4) * (height * 0.09);
-      const y = height / 2 - Math.cos(visualizerAngle * 1.4 + i * 0.4) * audioVal;
-      if (i === 0) ctx.moveTo(x, y);
-      else {
-        const prevX = (i - 1) * sliceWidth;
-        const prevY = height / 2 - Math.cos(visualizerAngle * 1.4 + (i - 1) * 0.4) * (isReceivingSignal ? (dataArray[((i - 1) * 2) % 36] / 255) * (height * 0.28) : Math.cos(visualizerAngle + (i - 1) * 0.4) * (height * 0.09));
-        const xc = (prevX + x) / 2;
-        const yc = (prevY + y) / 2;
-        ctx.quadraticCurveTo(prevX, prevY, xc, yc);
-      }
-    }
-    ctx.stroke();
-    ctx.restore();
-
   } else if (visualizerModeIndex === 1) {
-    // MODE 1: Minimalist Frequency Bars (High Dynamic Range + Radiant Neon Bloom)
+    // Mode 1: Minimalist Frequency Bars
     const barCount = 48;
     const barWidth = (width / barCount) * 0.62;
     const gap = (width / barCount) * 0.38;
@@ -648,7 +731,6 @@ function renderVisualizer() {
       if (isReceivingSignal) {
         const idx = Math.floor((i / barCount) * 54);
         const rawVal = dataArray[idx] / 255;
-        // Dynamic non-linear scaling for punchy bars
         val = Math.pow(rawVal, 0.78) * (height * 0.88);
       } else {
         val = (Math.sin(visualizerAngle * 2.2 + i * 0.28) * 0.5 + 0.5) * (height * 0.28) + 6;
@@ -658,7 +740,6 @@ function renderVisualizer() {
       const x = i * (barWidth + gap) + gap / 2;
       const y = (height - val) / 2;
 
-      // Glowing gradient bar
       const barGrad = ctx.createLinearGradient(0, y, 0, y + val);
       if (i % 2 === 0) {
         barGrad.addColorStop(0, '#FFFFFF');
@@ -680,12 +761,11 @@ function renderVisualizer() {
     ctx.restore();
 
   } else {
-    // MODE 2: Pulse Ribbon (Attack & Decay Envelope + Spatial Smoothing + Double-Pass Neon Ribbon Bloom)
+    // Mode 2: Pulse Ribbon
     const slices = 52;
     const targetBass = isReceivingSignal ? (((dataArray[1] || 0) + (dataArray[2] || 0) + (dataArray[3] || 0)) / (3 * 255)) : 0;
     const targetEnergy = isReceivingSignal ? Math.min(1, Math.max(0, (overallEnergy * 0.65 + targetBass * 0.85))) : 0;
 
-    // 1. Attack & Decay Envelope: Fast/Smooth Rise (Attack = 0.20) and Slow/Lingering Release (Decay = 0.05)
     const energyAttack = 0.20;
     const energyDecay = 0.052;
     if (targetEnergy > ribbonSmoothedEnergy) {
@@ -694,127 +774,35 @@ function renderVisualizer() {
       ribbonSmoothedEnergy += (targetEnergy - ribbonSmoothedEnergy) * energyDecay;
     }
 
-    if (targetBass > ribbonSmoothedBass) {
-      ribbonSmoothedBass += (targetBass - ribbonSmoothedBass) * energyAttack;
-    } else {
-      ribbonSmoothedBass += (targetBass - ribbonSmoothedBass) * energyDecay;
-    }
-
     const energyFactor = ribbonSmoothedEnergy;
-
-    // 2. Frequency Buffer Attack & Decay Update
-    const freqAttack = 0.22;
-    const freqDecay = 0.058;
-    for (let k = 0; k < 64; k++) {
-      const rawTarget = isReceivingSignal ? ((dataArray[k] || 0) / 255) : 0;
-      if (rawTarget > ribbonSmoothedFreqs[k]) {
-        ribbonSmoothedFreqs[k] += (rawTarget - ribbonSmoothedFreqs[k]) * freqAttack;
-      } else {
-        ribbonSmoothedFreqs[k] += (rawTarget - ribbonSmoothedFreqs[k]) * freqDecay;
-      }
-    }
-
-    // Safe margin ceiling to prevent clipping canvas edges
     const safeMargin = 10 * window.devicePixelRatio;
     const maxAmplitude = height * 0.38;
 
     for (let j = 0; j < 3; j++) {
-      // Generate smooth ribbon points with Spatial Smoothing & continuous blending
       const ribbonPoints = [];
-      const baseOffset = (j - 1) * (6 + energyFactor * 14); // Clean 6px parallel spacing when idle, expands smoothly on beat
+      const baseOffset = (j - 1) * (6 + energyFactor * 14);
 
       for (let i = 0; i < slices; i++) {
         const x = (i / (slices - 1)) * width;
-        
-        // Idle state: Very gentle, long-wavelength, non-twisting fluid drift
         const idleDrift = Math.sin(visualizerAngle * 0.6 + i * 0.07) * (height * 0.03);
-
-        // 3. Spatial Smoothing: 3-point Gaussian kernel across neighboring frequency bins
-        const freqIdx = Math.floor((i / slices) * 36) + j * 2;
-        const prevFreq = ribbonSmoothedFreqs[Math.max(0, freqIdx - 1)] || 0;
-        const currFreq = ribbonSmoothedFreqs[freqIdx] || 0;
-        const nextFreq = ribbonSmoothedFreqs[Math.min(63, freqIdx + 1)] || 0;
-        const spatialFreq = (prevFreq * 0.25 + currFreq * 0.50 + nextFreq * 0.25);
-
-        // 4. Continuous mathematical wave without hard if-else switching
-        const boostedFreq = Math.min(maxAmplitude, Math.pow(spatialFreq, 0.85) * (height * 0.44));
-        const dynamicBounce = Math.sin(visualizerAngle * (1.05 + j * 0.35 * energyFactor) + i * (0.08 + 0.11 * energyFactor)) * boostedFreq;
-
-        // Seamless slope transition between parallel idle and dynamic beat motion
-        const rawY = height / 2 + baseOffset + (idleDrift * (1 - energyFactor * 0.6)) + (dynamicBounce * energyFactor);
-        
-        // Safe clamping ceiling
+        const dynamicBounce = Math.sin(visualizerAngle * (1.05 + j * 0.35 * energyFactor) + i * (0.08 + 0.11 * energyFactor)) * (maxAmplitude * energyFactor);
+        const rawY = height / 2 + baseOffset + (idleDrift * (1 - energyFactor * 0.6)) + dynamicBounce;
         const clampedY = Math.max(safeMargin, Math.min(height - safeMargin, rawY));
         ribbonPoints.push({ x, y: clampedY });
       }
 
-      // Function to trace Catmull-Rom spline
-      const traceSplinePath = () => {
-        ctx.beginPath();
-        ctx.moveTo(ribbonPoints[0].x, ribbonPoints[0].y);
-        for (let i = 0; i < ribbonPoints.length - 1; i++) {
-          const p0 = ribbonPoints[Math.max(0, i - 1)];
-          const p1 = ribbonPoints[i];
-          const p2 = ribbonPoints[i + 1];
-          const p3 = ribbonPoints[Math.min(ribbonPoints.length - 1, i + 2)];
-
-          // Catmull-Rom control points
-          const cp1x = p1.x + (p2.x - p0.x) / 6;
-          const cp1y = p1.y + (p2.y - p0.y) / 6;
-          const cp2x = p2.x - (p3.x - p1.x) / 6;
-          const cp2y = p2.y - (p3.y - p1.y) / 6;
-
-          ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, p2.x, p2.y);
-        }
-      };
-
-      // PASS 1: Broad Radiant Bloom Stroke
       ctx.save();
-      ctx.lineCap = 'round';
-      ctx.lineJoin = 'round';
-      traceSplinePath();
-
-      if (j === 0) {
-        ctx.strokeStyle = `rgba(${currentTheme.glowRgb}, 0.85)`;
-        ctx.lineWidth = (4.5 + energyFactor * 3.5) * window.devicePixelRatio;
-        ctx.shadowBlur = (15 + energyFactor * 42) * window.devicePixelRatio;
-        ctx.shadowColor = `rgba(${currentTheme.glowRgb}, ${(0.55 + energyFactor * 0.45).toFixed(2)})`;
-      } else if (j === 1) {
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.75)';
-        ctx.lineWidth = (3.5 + energyFactor * 2.8) * window.devicePixelRatio;
-        ctx.shadowBlur = (12 + energyFactor * 28) * window.devicePixelRatio;
-        ctx.shadowColor = `rgba(233, 228, 224, ${(0.45 + energyFactor * 0.45).toFixed(2)})`;
-      } else {
-        ctx.strokeStyle = `rgba(${currentTheme.rgb}, 0.75)`;
-        ctx.lineWidth = (3.0 + energyFactor * 2.5) * window.devicePixelRatio;
-        ctx.shadowBlur = (10 + energyFactor * 32) * window.devicePixelRatio;
-        ctx.shadowColor = `rgba(${currentTheme.glowRgb}, ${(0.40 + energyFactor * 0.50).toFixed(2)})`;
+      ctx.beginPath();
+      ctx.moveTo(ribbonPoints[0].x, ribbonPoints[0].y);
+      for (let i = 1; i < ribbonPoints.length; i++) {
+        const xc = (ribbonPoints[i - 1].x + ribbonPoints[i].x) / 2;
+        const yc = (ribbonPoints[i - 1].y + ribbonPoints[i].y) / 2;
+        ctx.quadraticCurveTo(ribbonPoints[i - 1].x, ribbonPoints[i - 1].y, xc, yc);
       }
-      ctx.stroke();
-      ctx.restore();
-
-      // PASS 2: Crisp Glowing Core Stroke
-      ctx.save();
-      ctx.lineCap = 'round';
-      ctx.lineJoin = 'round';
-      traceSplinePath();
-
-      if (j === 0) {
-        ctx.strokeStyle = currentTheme.light;
-        ctx.lineWidth = (1.8 + energyFactor * 1.2) * window.devicePixelRatio;
-        ctx.shadowBlur = 8 * window.devicePixelRatio;
-        ctx.shadowColor = '#FFFFFF';
-      } else if (j === 1) {
-        ctx.strokeStyle = '#FFFFFF';
-        ctx.lineWidth = (1.5 + energyFactor * 1.0) * window.devicePixelRatio;
-        ctx.shadowBlur = 10 * window.devicePixelRatio;
-        ctx.shadowColor = '#FFFFFF';
-      } else {
-        ctx.strokeStyle = currentTheme.glow;
-        ctx.lineWidth = (1.4 + energyFactor * 1.0) * window.devicePixelRatio;
-        ctx.shadowBlur = 6 * window.devicePixelRatio;
-        ctx.shadowColor = '#FFFFFF';
-      }
+      ctx.lineWidth = (3.0 + energyFactor * 2.5) * window.devicePixelRatio;
+      ctx.strokeStyle = j === 0 ? `rgba(${currentTheme.glowRgb}, 0.85)` : (j === 1 ? '#FFFFFF' : `rgba(${currentTheme.rgb}, 0.75)`);
+      ctx.shadowBlur = (12 + energyFactor * 30) * window.devicePixelRatio;
+      ctx.shadowColor = `rgba(${currentTheme.glowRgb}, 0.8)`;
       ctx.stroke();
       ctx.restore();
     }
@@ -823,9 +811,8 @@ function renderVisualizer() {
 renderVisualizer();
 
 // ==========================================
-// 4. UI INTERACTIVITY & PRESET MANAGEMENT
+// 4. UI INTERACTIVITY & MARQUEE SYSTEM
 // ==========================================
-// Dynamic text overflow calculator for smooth Marquee Auto-Scroll
 function updateTextWithMarquee(containerId, textElemId, newText, defaultTitle) {
   const container = document.getElementById(containerId);
   const textElem = document.getElementById(textElemId);
@@ -836,13 +823,11 @@ function updateTextWithMarquee(containerId, textElemId, newText, defaultTitle) {
   textElem.title = tooltip;
   container.title = tooltip;
 
-  // Reset styles to calculate true scrollWidth
   textElem.classList.remove('marquee-active');
   container.classList.add('no-overflow');
   textElem.style.removeProperty('--marquee-shift');
   textElem.style.transform = 'translate3d(0, 0, 0)';
 
-  // Wait for layout reflow
   requestAnimationFrame(() => {
     const containerWidth = container.clientWidth;
     const textWidth = textElem.scrollWidth;
@@ -882,23 +867,41 @@ function setTrackPreset(index) {
   currentTrackIndex = (index + TRACK_PRESETS.length) % TRACK_PRESETS.length;
   const track = TRACK_PRESETS[currentTrackIndex];
 
-  // Update Typography with smooth Marquee Auto-Scroll
+  // Update Classic Typography
   updateTextWithMarquee('trackTitleContainer', 'trackTitle', track.title);
   updateTextWithMarquee('trackCategoryContainer', 'trackCategory', track.category);
   updateTextWithMarquee('trackArtistContainer', 'trackArtist', track.artist);
-  document.getElementById('trackDescription').textContent = track.description;
+  const descEl = document.getElementById('trackDescription');
+  if (descEl) descEl.textContent = track.description;
 
-  // Update Artwork & Duotone transition
+  // Update Artwork
   const img = document.getElementById('artworkImage');
-  img.style.opacity = '0';
-  setTimeout(() => {
-    img.src = track.artwork;
-    img.style.opacity = '1';
-  }, 250);
+  if (img) {
+    img.style.opacity = '0';
+    setTimeout(() => {
+      img.src = track.artwork;
+      img.style.opacity = '1';
+    }, 250);
+  }
 
   // Update Indicators
-  document.getElementById('presetIndicator').textContent = `${track.id} / 03`;
-  document.getElementById('footerCurrentIndex').textContent = track.id;
+  const indicator = document.getElementById('presetIndicator');
+  if (indicator) indicator.textContent = `${track.id} / 04`;
+  const footerIdx = document.getElementById('footerCurrentIndex');
+  if (footerIdx) footerIdx.textContent = track.id;
+
+  // Update CD Deck View Elements
+  const lcdTrackNum = document.getElementById('lcdTrackNum');
+  if (lcdTrackNum) lcdTrackNum.textContent = track.id;
+
+  const lcdStatusSub = document.getElementById('lcdStatusSub');
+  if (lcdStatusSub) lcdStatusSub.textContent = track.title;
+
+  const inlayTrackTitle = document.getElementById('inlayTrackTitle');
+  if (inlayTrackTitle) inlayTrackTitle.textContent = track.title;
+
+  const inlayArtist = document.getElementById('inlayArtist');
+  if (inlayArtist) inlayArtist.textContent = track.artist;
 
   // Reset Timeline for Synth Preset
   if (!isCustomAudio) {
@@ -906,7 +909,6 @@ function setTrackPreset(index) {
     updateTimelineUI(0, synthTrackDuration);
   }
 
-  // If playing and using generative synth, smoothly re-trigger
   if (isPlaying && !isCustomAudio) {
     if (synthTimer) clearTimeout(synthTimer);
     startSubBassDrone();
@@ -933,66 +935,95 @@ document.getElementById('toggleWaveStyle').addEventListener('click', () => {
   document.getElementById('canvasModeLabel').textContent = `Real-time ${modeName}`;
 });
 
-// Canvas click also switches visualizer style
-canvas.addEventListener('click', () => {
-  document.getElementById('toggleWaveStyle').click();
-});
+if (canvas) {
+  canvas.addEventListener('click', () => {
+    document.getElementById('toggleWaveStyle').click();
+  });
+}
 
-// Volume Slider
+// Volume Controls (Bidirectional sync with CD Deck)
 const volumeSlider = document.getElementById('volumeSlider');
+const cdVolumeSlider = document.getElementById('cdVolumeSlider');
 const volumeIcon = document.getElementById('volumeIcon');
-volumeSlider.addEventListener('input', (e) => {
-  const val = parseFloat(e.target.value);
+const volumeReadout = document.getElementById('volumeReadout');
+
+function setMasterVolume(val) {
   if (masterGain && audioCtx) {
     masterGain.gain.setValueAtTime(val, audioCtx.currentTime);
   }
-  if (val === 0) {
-    volumeIcon.setAttribute('data-lucide', 'volume-x');
-  } else if (val < 0.5) {
-    volumeIcon.setAttribute('data-lucide', 'volume-1');
-  } else {
-    volumeIcon.setAttribute('data-lucide', 'volume-2');
+  if (customAudioElement) {
+    customAudioElement.volume = val;
   }
-  lucide.createIcons();
+  if (volumeSlider) volumeSlider.value = val;
+  if (cdVolumeSlider) cdVolumeSlider.value = Math.round(val * 100);
+  if (volumeReadout) volumeReadout.textContent = `${Math.round(val * 100)}%`;
+
+  if (volumeIcon) {
+    if (val === 0) volumeIcon.setAttribute('data-lucide', 'volume-x');
+    else if (val < 0.5) volumeIcon.setAttribute('data-lucide', 'volume-1');
+    else volumeIcon.setAttribute('data-lucide', 'volume-2');
+    lucide.createIcons();
+  }
+}
+
+volumeSlider.addEventListener('input', (e) => {
+  setMasterVolume(parseFloat(e.target.value));
 });
 
-// Mute button toggle
+if (cdVolumeSlider) {
+  cdVolumeSlider.addEventListener('input', (e) => {
+    setMasterVolume(parseFloat(e.target.value) / 100);
+  });
+}
+
 document.getElementById('muteBtn').addEventListener('click', () => {
   if (volumeSlider.value > 0) {
     volumeSlider.dataset.prevVal = volumeSlider.value;
-    volumeSlider.value = 0;
+    setMasterVolume(0);
   } else {
-    volumeSlider.value = volumeSlider.dataset.prevVal || 0.75;
+    setMasterVolume(parseFloat(volumeSlider.dataset.prevVal || 0.75));
   }
-  volumeSlider.dispatchEvent(new Event('input'));
 });
 
-// Lo-Fi FX Mode
-const fxLoFiBtn = document.getElementById('fxLoFiBtn');
-const fxStatus = document.getElementById('fxStatus');
-fxLoFiBtn.addEventListener('click', () => {
+// Lo-Fi / Tube Warmth Filter Toggle
+function toggleLoFiWarmth() {
   initAudioContext();
   isLofiEnabled = !isLofiEnabled;
+
+  const fxStatus = document.getElementById('fxStatus');
+  const btnBassBoost = document.getElementById('btnBassBoost');
+  const bassLed = document.getElementById('bassLed');
+  const lcdBassBadge = document.getElementById('lcdBassBadge');
+
   if (isLofiEnabled) {
-    fxStatus.textContent = 'ON';
-    fxStatus.className = 'text-green-400 font-mono font-bold';
+    if (fxStatus) {
+      fxStatus.textContent = 'ON';
+      fxStatus.className = 'text-green-400 font-mono font-bold';
+    }
+    if (btnBassBoost) btnBassBoost.classList.add('active');
+    if (bassLed) bassLed.style.background = 'var(--amber-lit)';
+    if (lcdBassBadge) lcdBassBadge.classList.add('active');
     lofiFilterNode.frequency.setTargetAtTime(1400, audioCtx.currentTime, 0.1);
   } else {
-    fxStatus.textContent = 'OFF';
-    fxStatus.className = 'font-mono theme-transition';
-    fxStatus.style.color = 'var(--accent-primary)';
+    if (fxStatus) {
+      fxStatus.textContent = 'OFF';
+      fxStatus.className = 'font-mono theme-transition';
+      fxStatus.style.color = 'var(--accent-primary)';
+    }
+    if (btnBassBoost) btnBassBoost.classList.remove('active');
+    if (bassLed) bassLed.style.background = '#522600';
+    if (lcdBassBadge) lcdBassBadge.classList.remove('active');
     lofiFilterNode.frequency.setTargetAtTime(20000, audioCtx.currentTime, 0.1);
   }
-});
+}
+
+document.getElementById('fxLoFiBtn').addEventListener('click', toggleLoFiWarmth);
 
 // ==========================================
-// 5. CUSTOM AUDIO FILE UPLOAD
+// 5. AUDIO FILE & ARTWORK UPLOAD
 // ==========================================
-const audioFileInput = document.getElementById('audioFileInput');
-audioFileInput.addEventListener('change', (e) => {
-  const file = e.target.files[0];
+function handleAudioUpload(file) {
   if (!file) return;
-
   initAudioContext();
 
   if (customAudioElement) {
@@ -1003,19 +1034,26 @@ audioFileInput.addEventListener('change', (e) => {
   const fileURL = URL.createObjectURL(file);
   customAudioElement = new Audio(fileURL);
   customAudioElement.loop = true;
+  customAudioElement.volume = parseFloat(volumeSlider.value);
 
-  // Connect HTML5 audio element to Web Audio graph
   customAudioSource = audioCtx.createMediaElementSource(customAudioElement);
   customAudioSource.connect(lofiFilterNode);
 
   isCustomAudio = true;
-  const uploadedTitle = file.name.replace(/\.[^/.]+$/, '').toUpperCase();
-  updateTextWithMarquee('trackTitleContainer', 'trackTitle', uploadedTitle);
+  const cleanTitle = file.name.replace(/\.[^/.]+$/, '').toUpperCase();
+
+  // Update Classic UI
+  updateTextWithMarquee('trackTitleContainer', 'trackTitle', cleanTitle);
   updateTextWithMarquee('trackArtistContainer', 'trackArtist', 'User Uploaded Audio');
   updateTextWithMarquee('trackCategoryContainer', 'trackCategory', 'USER FILE • EXTERNAL');
   document.getElementById('trackDescription').textContent = `Now streaming "${file.name}" with real-time waveform processing.`;
 
-  // Duration & time tracking
+  // Update CD Deck UI
+  const inlayTrackTitle = document.getElementById('inlayTrackTitle');
+  if (inlayTrackTitle) inlayTrackTitle.textContent = cleanTitle;
+  const lcdStatusSub = document.getElementById('lcdStatusSub');
+  if (lcdStatusSub) lcdStatusSub.textContent = cleanTitle.slice(0, 14);
+
   customAudioElement.addEventListener('loadedmetadata', () => {
     updateTimelineUI(customAudioElement.currentTime, customAudioElement.duration);
   });
@@ -1027,19 +1065,30 @@ audioFileInput.addEventListener('change', (e) => {
   });
 
   startAudioPlayback();
+}
+
+document.getElementById('audioFileInput').addEventListener('change', (e) => {
+  handleAudioUpload(e.target.files[0]);
 });
 
-// ==========================================
-// 6. CUSTOM ARTWORK UPLOAD & RANDOM PRESET
-// ==========================================
+const cdAudioFileInput = document.getElementById('cdAudioFileInput');
+if (cdAudioFileInput) {
+  cdAudioFileInput.addEventListener('change', (e) => {
+    handleAudioUpload(e.target.files[0]);
+  });
+}
+
+// Artwork Upload & Random Preset
 const imageFileInput = document.getElementById('imageFileInput');
-imageFileInput.addEventListener('change', (e) => {
-  const file = e.target.files[0];
-  if (file) {
-    const url = URL.createObjectURL(file);
-    document.getElementById('artworkImage').src = url;
-  }
-});
+if (imageFileInput) {
+  imageFileInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const url = URL.createObjectURL(file);
+      document.getElementById('artworkImage').src = url;
+    }
+  });
+}
 
 const ARTWORK_COLLECTION = [
   'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=900&q=80',
@@ -1059,8 +1108,23 @@ document.getElementById('changeArtworkPresetBtn').addEventListener('click', () =
   }, 200);
 });
 
+// Custom Disc Screenprint Artwork Upload (CD Deck)
+const discArtInput = document.getElementById('discArtInput');
+if (discArtInput) {
+  discArtInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const url = URL.createObjectURL(file);
+    const cdSkinImg = document.getElementById('cdSkinImg');
+    if (cdSkinImg) {
+      cdSkinImg.src = url;
+      cdSkinImg.style.display = 'block';
+    }
+  });
+}
+
 // ==========================================
-// 7. TIMELINE SEEK & SCRUBBING ENGINE
+// 6. TIMELINE SEEK & SCRUBBING ENGINE
 // ==========================================
 const progressBarContainer = document.getElementById('progressBarContainer');
 const progressBarFill = document.getElementById('progressBarFill');
@@ -1095,90 +1159,68 @@ function applySeek(ratio) {
     synthCurrentTime = targetTime;
   }
 
-  // Update UI displays immediately
   const pct = ratio * 100;
-  progressBarFill.style.width = `${pct}%`;
-  progressBarThumb.style.left = `${pct}%`;
-  currentTimeDisplay.textContent = formatTime(targetTime);
-  durationDisplay.textContent = formatTime(totalDur);
+  if (progressBarFill) progressBarFill.style.width = `${pct}%`;
+  if (progressBarThumb) progressBarThumb.style.left = `${pct}%`;
+  if (currentTimeDisplay) currentTimeDisplay.textContent = formatTime(targetTime);
+  if (durationDisplay) durationDisplay.textContent = formatTime(totalDur);
+
+  // Sync CD Deck LCD
+  const lcdTimeCounter = document.getElementById('lcdTimeCounter');
+  const lcdProgressBarFill = document.getElementById('lcdProgressBarFill');
+  if (lcdTimeCounter) lcdTimeCounter.textContent = formatTime(targetTime);
+  if (lcdProgressBarFill) lcdProgressBarFill.style.width = `${pct}%`;
 }
 
-// Mouse Events for Progress Bar
-progressBarContainer.addEventListener('mousedown', (e) => {
-  isDraggingScrubber = true;
-  const ratio = calculateScrubRatio(e.clientX);
-  applySeek(ratio);
-});
-
-progressBarContainer.addEventListener('mousemove', (e) => {
-  const ratio = calculateScrubRatio(e.clientX);
-  const totalDur = getTrackDuration();
-  const hoverTime = ratio * totalDur;
-
-  // Update hover ghost fill and tooltip
-  progressHoverFill.style.width = `${ratio * 100}%`;
-  progressTooltip.style.left = `${ratio * 100}%`;
-  progressTooltip.textContent = formatTime(hoverTime);
-
-  // If actively dragging, seek along with cursor
-  if (isDraggingScrubber) {
-    applySeek(ratio);
-  }
-});
-
-progressBarContainer.addEventListener('mouseleave', () => {
-  if (!isDraggingScrubber) {
-    progressHoverFill.style.width = '0%';
-  }
-});
-
-// Global window events so dragging continues smoothly even if cursor moves outside bar
-window.addEventListener('mousemove', (e) => {
-  if (isDraggingScrubber) {
-    const ratio = calculateScrubRatio(e.clientX);
-    applySeek(ratio);
-  }
-});
-
-window.addEventListener('mouseup', (e) => {
-  if (isDraggingScrubber) {
-    isDraggingScrubber = false;
-    progressHoverFill.style.width = '0%';
-  }
-});
-
-// Touch Support for Mobile / Tablets
-progressBarContainer.addEventListener('touchstart', (e) => {
-  if (e.touches.length > 0) {
+if (progressBarContainer) {
+  progressBarContainer.addEventListener('mousedown', (e) => {
     isDraggingScrubber = true;
-    const ratio = calculateScrubRatio(e.touches[0].clientX);
-    applySeek(ratio);
-  }
-}, { passive: true });
+    applySeek(calculateScrubRatio(e.clientX));
+  });
 
-window.addEventListener('touchmove', (e) => {
-  if (isDraggingScrubber && e.touches.length > 0) {
-    const ratio = calculateScrubRatio(e.touches[0].clientX);
-    applySeek(ratio);
-  }
-}, { passive: true });
+  progressBarContainer.addEventListener('mousemove', (e) => {
+    const ratio = calculateScrubRatio(e.clientX);
+    const totalDur = getTrackDuration();
+    if (progressHoverFill) progressHoverFill.style.width = `${ratio * 100}%`;
+    if (progressTooltip) {
+      progressTooltip.style.left = `${ratio * 100}%`;
+      progressTooltip.textContent = formatTime(ratio * totalDur);
+    }
+    if (isDraggingScrubber) applySeek(ratio);
+  });
 
-window.addEventListener('touchend', () => {
+  progressBarContainer.addEventListener('mouseleave', () => {
+    if (!isDraggingScrubber && progressHoverFill) progressHoverFill.style.width = '0%';
+  });
+}
+
+// Scrubber for CD Deck LCD Progress Bar
+const lcdProgressBarWrapper = document.getElementById('lcdProgressBarWrapper');
+if (lcdProgressBarWrapper) {
+  lcdProgressBarWrapper.addEventListener('click', (e) => {
+    const rect = lcdProgressBarWrapper.getBoundingClientRect();
+    const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+    applySeek(ratio);
+  });
+}
+
+window.addEventListener('mousemove', (e) => {
+  if (isDraggingScrubber) applySeek(calculateScrubRatio(e.clientX));
+});
+
+window.addEventListener('mouseup', () => {
   if (isDraggingScrubber) {
     isDraggingScrubber = false;
+    if (progressHoverFill) progressHoverFill.style.width = '0%';
   }
 });
 
-// Navigation buttons shortcuts
-document.getElementById('navNowPlaying').addEventListener('click', () => {
-  togglePlay();
-});
+// Navigation shortcuts
+document.getElementById('navNowPlaying').addEventListener('click', togglePlay);
 document.getElementById('navVisualizer').addEventListener('click', () => {
   document.getElementById('toggleWaveStyle').click();
 });
-document.getElementById('navSoundFx').addEventListener('click', () => {
-  document.getElementById('fxLoFiBtn').click();
-});
+document.getElementById('navSoundFx').addEventListener('click', toggleLoFiWarmth);
 document.getElementById('navPresets').addEventListener('click', () => {
   document.getElementById('nextTrackBtn').click();
 });
@@ -1198,7 +1240,7 @@ infoModal.addEventListener('click', (e) => {
   if (e.target === infoModal) infoModal.classList.add('hidden');
 });
 
-// Global Keybindings (Space to Play/Pause, Arrow keys for tracks)
+// Global Keybindings
 window.addEventListener('keydown', (e) => {
   if (e.code === 'Space' && e.target.tagName !== 'INPUT') {
     e.preventDefault();
@@ -1210,8 +1252,514 @@ window.addEventListener('keydown', (e) => {
   }
 });
 
-// Initial Marquee check on load
-window.addEventListener('load', refreshAllMarquees);
+// ============================================================
+// 7. AUDIWAVE ROMANTIC CD DECK ENGINE & DRAG & DROP
+// ============================================================
+let isDiscLoaded = false;
+const DISC_SKIN_PRESETS = {
+  'vintage-rose': 'assets/skin_vintage_rose.jpg',
+  'botanical': 'assets/vintage_velvet_rose.jpg',
+  'golden-sheen': null
+};
+
+function syncAudiWaveDeckPlayback(playing) {
+  const playerChassis = document.querySelector('.player-chassis');
+  const cdDisc = document.getElementById('cdDisc');
+  const lcdStatusText = document.getElementById('lcdStatusText');
+  const playBtnLabel = document.getElementById('playBtnLabel');
+  const lcdDiscIcon = document.getElementById('lcdDiscIcon');
+
+  if (playing) {
+    if (playerChassis) playerChassis.classList.add('is-playing');
+    if (cdDisc) {
+      cdDisc.classList.remove('decelerating');
+      cdDisc.classList.add('spinning');
+    }
+    if (lcdStatusText) lcdStatusText.textContent = 'PLAYING';
+    if (playBtnLabel) playBtnLabel.textContent = 'PAUSE';
+    if (lcdDiscIcon) lcdDiscIcon.classList.add('active');
+  } else {
+    if (playerChassis) playerChassis.classList.remove('is-playing');
+    if (cdDisc) {
+      cdDisc.classList.remove('spinning');
+      cdDisc.classList.add('decelerating');
+    }
+    if (lcdStatusText) lcdStatusText.textContent = isDiscLoaded ? 'PAUSE' : 'NO DISC';
+    if (playBtnLabel) playBtnLabel.textContent = 'PLAY';
+  }
+}
+
+function audiWaveInsertDisc() {
+  initAudioContext();
+  const loadedDiscSlot = document.getElementById('loadedDiscSlot');
+  const cdDisc = document.getElementById('cdDisc');
+  const playerChassis = document.querySelector('.player-chassis');
+  const laserPickupHead = document.getElementById('laserPickupHead');
+  const lcdTrackNum = document.getElementById('lcdTrackNum');
+  const lcdStatusText = document.getElementById('lcdStatusText');
+  const lcdStatusSub = document.getElementById('lcdStatusSub');
+  const lcdDiscIcon = document.getElementById('lcdDiscIcon');
+  const playBtnLabel = document.getElementById('playBtnLabel');
+
+  if (!cdDisc || !loadedDiscSlot) return;
+
+  // Move Disc element into center spindle slot
+  loadedDiscSlot.appendChild(cdDisc);
+  cdDisc.style.transform = '';
+  cdDisc.classList.add('snap-anim');
+  setTimeout(() => cdDisc.classList.remove('snap-anim'), 350);
+
+  // Play mechanical clamp sound
+  playSnapSound();
+
+  // Update State
+  isDiscLoaded = true;
+  if (playerChassis) playerChassis.classList.add('has-disc', 'is-playing');
+  cdDisc.classList.remove('decelerating');
+  cdDisc.classList.add('spinning');
+
+  // Laser optical sweep
+  if (laserPickupHead) laserPickupHead.style.left = '45%';
+  playLaserSeekSound();
+
+  // LCD Update
+  const track = TRACK_PRESETS[currentTrackIndex];
+  if (lcdTrackNum) lcdTrackNum.textContent = track.id;
+  if (lcdStatusText) lcdStatusText.textContent = 'PLAYING';
+  if (lcdStatusSub) lcdStatusSub.textContent = track.title;
+  if (lcdDiscIcon) lcdDiscIcon.classList.add('active');
+  if (playBtnLabel) playBtnLabel.textContent = 'PAUSE';
+
+  // Start continuous audio playback
+  if (!isPlaying) {
+    startAudioPlayback();
+  }
+}
+
+function audiWaveEjectDisc() {
+  initAudioContext();
+  playEjectSound();
+
+  if (isPlaying) {
+    pauseAudioPlayback();
+  }
+
+  const cdDisc = document.getElementById('cdDisc');
+  const discDockArea = document.getElementById('discDockArea');
+  const playerChassis = document.querySelector('.player-chassis');
+  const laserPickupHead = document.getElementById('laserPickupHead');
+  const lcdStatusText = document.getElementById('lcdStatusText');
+  const lcdStatusSub = document.getElementById('lcdStatusSub');
+  const lcdDiscIcon = document.getElementById('lcdDiscIcon');
+  const playBtnLabel = document.getElementById('playBtnLabel');
+
+  if (cdDisc) {
+    cdDisc.classList.remove('spinning');
+    cdDisc.classList.add('decelerating');
+  }
+
+  isDiscLoaded = false;
+
+  setTimeout(() => {
+    if (cdDisc && discDockArea) {
+      cdDisc.classList.remove('decelerating');
+      discDockArea.appendChild(cdDisc);
+      cdDisc.style.transform = '';
+    }
+    if (playerChassis) playerChassis.classList.remove('has-disc', 'is-playing');
+    if (laserPickupHead) laserPickupHead.style.left = '20%';
+
+    if (lcdStatusText) lcdStatusText.textContent = 'NO DISC';
+    if (lcdStatusSub) lcdStatusSub.textContent = 'PLEASE INSERT RECORD';
+    if (lcdDiscIcon) lcdDiscIcon.classList.remove('active');
+    if (playBtnLabel) playBtnLabel.textContent = 'PLAY';
+  }, 450);
+}
+
+function setupAudiWaveDragAndDrop() {
+  const cdDisc = document.getElementById('cdDisc');
+  const cdDeckDropZone = document.getElementById('cdDeckDropZone');
+  const jewelCaseFrame = document.getElementById('jewelCaseFrame');
+
+  if (!cdDisc || !cdDeckDropZone) return;
+
+  let startX = 0, startY = 0;
+  let isDragging = false;
+  let hasMoved = false;
+  let dragOrigin = 'case';
+
+  const onPointerDown = (e) => {
+    isDragging = true;
+    hasMoved = false;
+    dragOrigin = isDiscLoaded ? 'deck' : 'case';
+    startX = e.clientX;
+    startY = e.clientY;
+    cdDisc.classList.add('is-dragging');
+    try {
+      cdDisc.setPointerCapture(e.pointerId);
+    } catch (err) {}
+  };
+
+  const onPointerMove = (e) => {
+    if (!isDragging) return;
+    const dx = e.clientX - startX;
+    const dy = e.clientY - startY;
+    if (Math.hypot(dx, dy) > 8) {
+      hasMoved = true;
+    }
+    cdDisc.style.transform = `translate3d(${dx}px, ${dy}px, 0) scale(1.06) rotate(-4deg)`;
+
+    if (dragOrigin === 'case') {
+      const dropRect = cdDeckDropZone.getBoundingClientRect();
+      const isOver = e.clientX >= dropRect.left && e.clientX <= dropRect.right &&
+                     e.clientY >= dropRect.top && e.clientY <= dropRect.bottom;
+      cdDeckDropZone.classList.toggle('drag-over', isOver);
+    } else if (jewelCaseFrame) {
+      const caseRect = jewelCaseFrame.getBoundingClientRect();
+      const isOverCase = e.clientX >= caseRect.left && e.clientX <= caseRect.right &&
+                         e.clientY >= caseRect.top && e.clientY <= caseRect.bottom;
+      jewelCaseFrame.classList.toggle('drag-over-case', isOverCase);
+    }
+  };
+
+  const onPointerUp = (e) => {
+    if (!isDragging) return;
+    isDragging = false;
+    cdDisc.classList.remove('is-dragging');
+    cdDeckDropZone.classList.remove('drag-over');
+    if (jewelCaseFrame) jewelCaseFrame.classList.remove('drag-over-case');
+    try {
+      cdDisc.releasePointerCapture(e.pointerId);
+    } catch (err) {}
+
+    if (dragOrigin === 'case') {
+      const dropRect = cdDeckDropZone.getBoundingClientRect();
+      const isOver = e.clientX >= dropRect.left && e.clientX <= dropRect.right &&
+                     e.clientY >= dropRect.top && e.clientY <= dropRect.bottom;
+
+      if (isOver && hasMoved) {
+        cdDisc.style.transform = '';
+        audiWaveInsertDisc();
+      } else if (!hasMoved) {
+        // Direct click to insert!
+        cdDisc.style.transform = '';
+        audiWaveInsertDisc();
+      } else {
+        cdDisc.style.transition = 'transform 0.3s cubic-bezier(0.25, 1, 0.5, 1)';
+        cdDisc.style.transform = '';
+        setTimeout(() => { cdDisc.style.transition = ''; }, 300);
+      }
+    } else {
+      let isOverCase = false;
+      if (jewelCaseFrame) {
+        const caseRect = jewelCaseFrame.getBoundingClientRect();
+        isOverCase = e.clientX >= caseRect.left && e.clientX <= caseRect.right &&
+                     e.clientY >= caseRect.top && e.clientY <= caseRect.bottom;
+      }
+
+      if (isOverCase && hasMoved) {
+        cdDisc.style.transform = '';
+        audiWaveEjectDisc();
+      } else if (!hasMoved) {
+        // Direct click on spinning CD toggles Play/Pause
+        cdDisc.style.transform = '';
+        togglePlay();
+      } else {
+        cdDisc.style.transition = 'transform 0.3s cubic-bezier(0.25, 1, 0.5, 1)';
+        cdDisc.style.transform = '';
+        setTimeout(() => { cdDisc.style.transition = ''; }, 300);
+      }
+    }
+  };
+
+  cdDisc.addEventListener('pointerdown', onPointerDown);
+  cdDisc.addEventListener('pointermove', onPointerMove);
+  cdDisc.addEventListener('pointerup', onPointerUp);
+  cdDisc.addEventListener('pointercancel', onPointerUp);
+
+  // HTML5 Drag & Drop Support
+  cdDisc.addEventListener('dragstart', (e) => {
+    cdDisc.classList.add('is-dragging');
+    e.dataTransfer.setData('text/plain', 'audiwave-cd');
+    e.dataTransfer.effectAllowed = 'move';
+  });
+
+  cdDisc.addEventListener('dragend', () => {
+    cdDisc.classList.remove('is-dragging');
+    cdDeckDropZone.classList.remove('drag-over');
+    if (jewelCaseFrame) jewelCaseFrame.classList.remove('drag-over-case');
+  });
+
+  cdDeckDropZone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    if (!isDiscLoaded) {
+      e.dataTransfer.dropEffect = 'move';
+      cdDeckDropZone.classList.add('drag-over');
+    }
+  });
+
+  cdDeckDropZone.addEventListener('dragleave', () => {
+    cdDeckDropZone.classList.remove('drag-over');
+  });
+
+  cdDeckDropZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    cdDeckDropZone.classList.remove('drag-over');
+    if (!isDiscLoaded) {
+      audiWaveInsertDisc();
+    }
+  });
+
+  if (jewelCaseFrame) {
+    jewelCaseFrame.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      if (isDiscLoaded) {
+        e.dataTransfer.dropEffect = 'move';
+        jewelCaseFrame.classList.add('drag-over-case');
+      }
+    });
+
+    jewelCaseFrame.addEventListener('dragleave', () => {
+      jewelCaseFrame.classList.remove('drag-over-case');
+    });
+
+    jewelCaseFrame.addEventListener('drop', (e) => {
+      e.preventDefault();
+      jewelCaseFrame.classList.remove('drag-over-case');
+      if (isDiscLoaded) {
+        audiWaveEjectDisc();
+      }
+    });
+  }
+}
+
+function setupAudiWaveKeypad() {
+  const btnPlayPause = document.getElementById('btnPlayPause');
+  const btnStop = document.getElementById('btnStop');
+  const btnEject = document.getElementById('btnEject');
+  const btnDeckEject = document.getElementById('btnDeckEject');
+  const btnPrev = document.getElementById('btnPrev');
+  const btnNext = document.getElementById('btnNext');
+  const btnBassBoost = document.getElementById('btnBassBoost');
+
+  if (btnPlayPause) {
+    btnPlayPause.addEventListener('click', () => {
+      initAudioContext();
+      playBeep(1200);
+
+      if (!isDiscLoaded) {
+        playBeep(300, 0.15);
+        const lcdStatusText = document.getElementById('lcdStatusText');
+        if (lcdStatusText) {
+          lcdStatusText.textContent = 'NO DISC';
+          lcdStatusText.style.color = '#ff4444';
+          setTimeout(() => {
+            lcdStatusText.style.color = '';
+            lcdStatusText.textContent = 'NO DISC';
+          }, 1200);
+        }
+        return;
+      }
+      togglePlay();
+    });
+  }
+
+  if (btnStop) {
+    btnStop.addEventListener('click', () => {
+      initAudioContext();
+      playBeep(800);
+      if (!isDiscLoaded) return;
+      pauseAudioPlayback();
+      synthCurrentTime = 0;
+      if (customAudioElement) customAudioElement.currentTime = 0;
+      updateTimelineUI(0, getTrackDuration());
+      const lcdStatusText = document.getElementById('lcdStatusText');
+      if (lcdStatusText) lcdStatusText.textContent = 'STOP';
+    });
+  }
+
+  const handleEject = () => {
+    if (isDiscLoaded) {
+      audiWaveEjectDisc();
+    } else {
+      playBeep(600);
+    }
+  };
+
+  if (btnEject) btnEject.addEventListener('click', handleEject);
+  if (btnDeckEject) btnDeckEject.addEventListener('click', handleEject);
+
+  if (btnPrev) {
+    btnPrev.addEventListener('click', () => {
+      initAudioContext();
+      playBeep(1000);
+      setTrackPreset(currentTrackIndex - 1);
+      playLaserSeekSound();
+    });
+  }
+
+  if (btnNext) {
+    btnNext.addEventListener('click', () => {
+      initAudioContext();
+      playBeep(1100);
+      setTrackPreset(currentTrackIndex + 1);
+      playLaserSeekSound();
+    });
+  }
+
+  if (btnBassBoost) {
+    btnBassBoost.addEventListener('click', () => {
+      playBeep(isLofiEnabled ? 250 : 400, 0.08);
+      toggleLoFiWarmth();
+    });
+  }
+
+  // Disc Skin Presets
+  document.querySelectorAll('.btn-disc-select').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.btn-disc-select').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const discKey = btn.dataset.disc;
+      const asset = DISC_SKIN_PRESETS[discKey];
+      const cdSkinImg = document.getElementById('cdSkinImg');
+      if (cdSkinImg) {
+        if (asset) {
+          cdSkinImg.src = asset;
+          cdSkinImg.style.display = 'block';
+        } else {
+          cdSkinImg.style.display = 'none';
+        }
+      }
+    });
+  });
+}
+
+// Dust Particle Canvas Animation
+let dustAnimationFrame = null;
+function initVintageDustCanvas() {
+  const canvas = document.getElementById('vintageDustCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  let particles = [];
+
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  for (let i = 0; i < 35; i++) {
+    particles.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      radius: Math.random() * 1.8 + 0.6,
+      speedX: (Math.random() - 0.5) * 0.35,
+      speedY: -Math.random() * 0.4 - 0.1,
+      alpha: Math.random() * 0.45 + 0.25
+    });
+  }
+
+  function loop() {
+    if (activeSkin === 'cdDeck') {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (const p of particles) {
+        p.x += p.speedX;
+        p.y += p.speedY;
+        if (p.y < -10) p.y = canvas.height + 10;
+        if (p.x < -10) p.x = canvas.width + 10;
+        if (p.x > canvas.width + 10) p.x = -10;
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255, 215, 120, ${p.alpha})`;
+        ctx.shadowBlur = 6;
+        ctx.shadowColor = 'rgba(255, 190, 80, 0.7)';
+        ctx.fill();
+      }
+    }
+    dustAnimationFrame = requestAnimationFrame(loop);
+  }
+  if (!dustAnimationFrame) loop();
+}
+
+// ==========================================
+// 8. SKIN / MODE SWITCHER LOGIC
+// ==========================================
+function switchSkin(skin) {
+  activeSkin = skin;
+  const classicView = document.getElementById('classicView');
+  const cdDeckView = document.getElementById('cdDeckView');
+  const btnSkinClassic = document.getElementById('btnSkinClassic');
+  const btnSkinCdDeck = document.getElementById('btnSkinCdDeck');
+
+  if (skin === 'cdDeck') {
+    document.body.classList.add('skin-cd-deck');
+    if (classicView) classicView.classList.add('hidden');
+    if (cdDeckView) cdDeckView.classList.remove('hidden');
+
+    if (btnSkinClassic) {
+      btnSkinClassic.className = 'flex items-center space-x-1.5 px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-semibold tracking-wider transition-all duration-300 text-offwhite-muted hover:text-offwhite cursor-pointer';
+    }
+    if (btnSkinCdDeck) {
+      btnSkinCdDeck.className = 'flex items-center space-x-1.5 px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-semibold tracking-wider transition-all duration-300 bg-[#8b1523] text-white shadow-[0_0_12px_rgba(139,21,35,0.7)] border border-[#d4af37] cursor-pointer';
+    }
+
+    // Sync CD Deck state with current audio state
+    if (isPlaying) {
+      const cdDisc = document.getElementById('cdDisc');
+      const loadedDiscSlot = document.getElementById('loadedDiscSlot');
+      if (cdDisc && loadedDiscSlot && !isDiscLoaded) {
+        loadedDiscSlot.appendChild(cdDisc);
+        isDiscLoaded = true;
+      }
+      syncAudiWaveDeckPlayback(true);
+    }
+
+    const currentTrack = TRACK_PRESETS[currentTrackIndex];
+    const lcdTrackNum = document.getElementById('lcdTrackNum');
+    if (lcdTrackNum) lcdTrackNum.textContent = currentTrack.id;
+
+    const lcdStatusSub = document.getElementById('lcdStatusSub');
+    if (lcdStatusSub) lcdStatusSub.textContent = isCustomAudio ? 'USER AUDIO' : currentTrack.title;
+
+    const inlayTrackTitle = document.getElementById('inlayTrackTitle');
+    if (inlayTrackTitle) inlayTrackTitle.textContent = isCustomAudio ? 'CUSTOM TRACK' : currentTrack.title;
+
+    const inlayArtist = document.getElementById('inlayArtist');
+    if (inlayArtist) inlayArtist.textContent = isCustomAudio ? 'User Upload' : currentTrack.artist;
+
+    initVintageDustCanvas();
+
+  } else {
+    document.body.classList.remove('skin-cd-deck');
+    if (cdDeckView) cdDeckView.classList.add('hidden');
+    if (classicView) classicView.classList.remove('hidden');
+
+    if (btnSkinClassic) {
+      btnSkinClassic.className = 'flex items-center space-x-1.5 px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-semibold tracking-wider transition-all duration-300 theme-transition bg-[var(--accent-primary)] text-white shadow-md cursor-pointer';
+    }
+    if (btnSkinCdDeck) {
+      btnSkinCdDeck.className = 'flex items-center space-x-1.5 px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-semibold tracking-wider transition-all duration-300 text-offwhite-muted hover:text-offwhite cursor-pointer';
+    }
+
+    resizeCanvas();
+    refreshAllMarquees();
+    updatePlayButtonUI(isPlaying);
+  }
+}
+
+document.getElementById('btnSkinClassic').addEventListener('click', () => switchSkin('classic'));
+document.getElementById('btnSkinCdDeck').addEventListener('click', () => switchSkin('cdDeck'));
+
+// Initialize CD Deck Listeners
+setupAudiWaveDragAndDrop();
+setupAudiWaveKeypad();
+
+// Initial Marquee & Entrance
+window.addEventListener('load', () => {
+  refreshAllMarquees();
+});
 refreshAllMarquees();
 
 // ==========================================

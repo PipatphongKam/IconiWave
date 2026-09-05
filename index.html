@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>IconiWave — Audio Experience & Visualizer</title>
+  <title>IconiWave & AudiWave — Dual Skin Audio Experience</title>
   
-  <!-- Google Fonts -->
+  <!-- Google Fonts: IconiWave Classic + AudiWave Romantic Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Outfit:wght@600;700;800;900&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,500&family=Playfair+Display:ital,wght@0,600;0,700;0,900;1,400&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,400&family=Courier+Prime:ital,wght@0,400;0,700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
   
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -41,7 +41,10 @@
           },
           fontFamily: {
             sans: ['"Plus Jakarta Sans"', 'sans-serif'],
-            display: ['"Syne"', '"Plus Jakarta Sans"', 'sans-serif']
+            display: ['"Syne"', '"Plus Jakarta Sans"', 'sans-serif'],
+            cinzel: ['"Cinzel"', 'serif'],
+            romantic: ['"Cormorant Garamond"', 'Georgia', 'serif'],
+            serifDisplay: ['"Playfair Display"', 'Georgia', 'serif']
           }
         }
       }
@@ -52,7 +55,7 @@
   <link rel="stylesheet" href="css/style.css">
 </head>
 
-<body class="min-h-screen min-h-[100dvh] w-screen overflow-x-hidden overflow-y-auto flex flex-col justify-between bg-[#1B191A] font-sans antialiased text-[#E9E4E0] relative selection:bg-terracotta selection:text-white py-4 md:py-6">
+<body class="min-h-screen min-h-[100dvh] w-screen overflow-x-hidden overflow-y-auto flex flex-col justify-between bg-[#1B191A] font-sans antialiased text-[#E9E4E0] relative selection:bg-terracotta selection:text-white py-2 sm:py-4">
 
   <!-- ==================== CINEMATIC INTRO BLACK OVERLAY ==================== -->
   <div id="cinematicOverlay"></div>
@@ -62,7 +65,7 @@
     <!-- Hero Artwork Ambient Glow (Right side behind sculpture) -->
     <div id="ambientHeroGlow" class="absolute top-1/2 right-[-5%] sm:right-[5%] lg:right-[8%] -translate-y-1/2 w-[480px] h-[480px] sm:w-[580px] sm:h-[580px] lg:w-[700px] lg:h-[700px] rounded-full blur-[130px] ambient-glow-right transition-all duration-500" style="background: radial-gradient(circle, rgba(var(--accent-rgb), 0.45) 0%, rgba(var(--accent-glow-rgb), 0.30) 45%, transparent 70%);"></div>
 
-    <!-- Top-Left Soft Glow (Balances typography area with warm neon bloom) -->
+    <!-- Top-Left Soft Glow -->
     <div id="ambientLeftGlow" class="absolute -top-24 -left-24 w-[360px] h-[360px] sm:w-[460px] sm:h-[460px] rounded-full blur-[140px] ambient-glow-left transition-all duration-500" style="background: radial-gradient(circle, rgba(var(--accent-rgb), 0.28) 0%, transparent 70%);"></div>
 
     <!-- Bottom-Left Decorative Sphere Glow -->
@@ -71,27 +74,27 @@
     <!-- Center Depth Subtle Gradient Mesh -->
     <div id="ambientCenterGlow" class="absolute top-1/3 left-1/3 w-[460px] h-[460px] rounded-full blur-[160px] transition-all duration-500" style="background: rgba(var(--accent-rgb), 0.12);"></div>
 
-    <!-- Film Vignette Mask to keep editorial edges crisp and legible -->
+    <!-- Film Vignette Mask -->
     <div class="absolute inset-0 bg-radial from-transparent via-transparent to-[#1B191A]/60 mix-blend-multiply"></div>
   </div>
 
-  <!-- ==================== MAIN APP WRAPPER (Cinematic Zoom-out Dolly Motion) ==================== -->
+  <!-- ==================== MAIN APP WRAPPER ==================== -->
   <div id="appWrapper" class="relative z-10 w-full min-h-screen flex flex-col justify-between flex-1">
 
     <!-- ==================== HEADER / NAV BAR ==================== -->
-    <header class="relative z-30 flex items-center justify-between px-6 sm:px-10 lg:px-14 py-2 sm:py-2.5 shrink-0 cinematic-item delay-header">
+    <header class="relative z-30 flex items-center justify-between px-4 sm:px-8 lg:px-14 py-2 sm:py-2.5 shrink-0 cinematic-item delay-header">
       <!-- Logo with geometric colored slashes -->
-      <div class="flex items-center space-x-3 sm:space-x-3.5 cursor-pointer group" id="logoBtn">
+      <div class="flex items-center space-x-2.5 sm:space-x-3.5 cursor-pointer group" id="logoBtn">
         <div class="flex space-x-1 items-center">
           <div class="w-1.5 h-5 sm:h-6 rounded-sm transform -skew-x-12 theme-transition" style="background-color: var(--accent-primary);"></div>
           <div class="w-1.5 h-5 sm:h-6 rounded-sm transform -skew-x-12 opacity-80 group-hover:opacity-100 theme-transition" style="background-color: var(--accent-light);"></div>
           <div class="w-1.5 h-5 sm:h-6 rounded-sm transform -skew-x-12 opacity-60 group-hover:opacity-100 theme-transition" style="background-color: var(--accent-glow);"></div>
         </div>
-        <span class="font-bold tracking-widest text-base sm:text-lg font-display uppercase text-offwhite group-hover:text-[var(--accent-light)] theme-transition">IconiWave</span>
+        <span class="font-bold tracking-widest text-sm sm:text-lg font-display uppercase text-offwhite group-hover:text-[var(--accent-light)] theme-transition">IconiWave</span>
       </div>
 
       <!-- Navigation Menu (Editorial Style) -->
-      <nav class="hidden lg:flex items-center space-x-6 xl:space-x-8 text-[11px] xl:text-xs font-semibold tracking-widest uppercase text-offwhite-muted">
+      <nav class="hidden xl:flex items-center space-x-6 text-[11px] xl:text-xs font-semibold tracking-widest uppercase text-offwhite-muted">
         <button id="navNowPlaying" class="text-offwhite hover:text-[var(--accent-light)] theme-transition relative py-1 after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-full after:h-[2px]" style="--tw-after-bg: var(--accent-primary);">
           NOW PLAYING
         </button>
@@ -106,17 +109,29 @@
         </button>
       </nav>
 
+      <!-- Center: Skin / Deck Switcher (IconiWave Classic vs Romantic CD Deck) -->
+      <div class="flex items-center p-1 rounded-full border border-white/10 shadow-inner backdrop-blur-md" id="skinModeSwitcher">
+        <button id="btnSkinClassic" class="flex items-center space-x-1.5 px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-semibold tracking-wider transition-all duration-300 theme-transition bg-[var(--accent-primary)] text-white shadow-md cursor-pointer" title="IconiWave Classic Experience">
+          <i data-lucide="waves" class="w-3.5 h-3.5"></i>
+          <span class="hidden xs:inline">Classic Wave</span>
+        </button>
+        <button id="btnSkinCdDeck" class="flex items-center space-x-1.5 px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-semibold tracking-wider transition-all duration-300 text-offwhite-muted hover:text-offwhite cursor-pointer" title="Romantic Vintage CD Deck (AudiWave)">
+          <i data-lucide="disc" class="w-3.5 h-3.5"></i>
+          <span class="hidden xs:inline">Romantic CD</span>
+        </button>
+      </div>
+
       <!-- Right Controls: Theme Switcher & Utility buttons -->
       <div class="flex items-center space-x-2 sm:space-x-3">
         
         <!-- Minimalist Theme Picker (6 Color Dots) -->
-        <div class="flex items-center space-x-1.5 bg-charcoal-card/90 border border-white/10 px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-full shadow-inner backdrop-blur-md" id="themePickerContainer">
+        <div class="hidden sm:flex items-center space-x-1.5 bg-charcoal-card/90 border border-white/10 px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-full shadow-inner backdrop-blur-md" id="themePickerContainer">
           <!-- Injected via JavaScript -->
         </div>
 
         <label for="audioFileInput" class="flex items-center space-x-1.5 sm:space-x-2 text-[11px] sm:text-xs font-medium bg-charcoal-card hover:bg-white/5 text-offwhite border border-white/10 hover:border-[var(--accent-light)] px-2.5 py-1.5 sm:px-3.5 sm:py-2 rounded-full cursor-pointer theme-transition">
           <i data-lucide="upload" class="w-3.5 h-3.5" style="color: var(--accent-light);"></i>
-          <span class="hidden sm:inline">Upload Audio</span>
+          <span class="hidden sm:inline">Upload</span>
         </label>
         <input type="file" id="audioFileInput" accept="audio/*" class="hidden">
 
@@ -126,190 +141,486 @@
       </div>
     </header>
 
-    <!-- ==================== HERO MAIN CONTAINER ==================== -->
-    <main class="relative z-10 flex-1 w-full grid grid-cols-1 lg:grid-cols-12 items-center px-6 sm:px-10 lg:px-14 py-2 md:py-4 gap-4 sm:gap-6 lg:gap-8 xl:gap-10">
+    <!-- ==================== VIEW 1: CLASSIC ICONIWAVE ==================== -->
+    <div id="classicView" class="w-full flex-1 flex flex-col justify-between transition-opacity duration-300">
       
-      <!-- LEFT COLUMN: Typography, Smooth Real-time Waveform & Audio Controls -->
-      <section class="lg:col-span-6 flex flex-col justify-center space-y-2 sm:space-y-3 md:space-y-3.5 xl:space-y-4 lg:pr-2 xl:pr-6 z-20">
+      <!-- HERO MAIN CONTAINER -->
+      <main class="relative z-10 flex-1 w-full grid grid-cols-1 lg:grid-cols-12 items-center px-6 sm:px-10 lg:px-14 py-2 md:py-4 gap-4 sm:gap-6 lg:gap-8 xl:gap-10">
         
-        <!-- Subtitle badge with overflow protection -->
-        <div class="flex items-center space-x-2 max-w-full overflow-hidden cinematic-item delay-title">
-          <span class="inline-block w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full animate-ping theme-transition shrink-0" style="background-color: var(--accent-primary);"></span>
-          <div id="trackCategoryContainer" class="overflow-hidden marquee-container no-overflow flex items-center flex-1" title="OUR VERSION • EXPERIENCE 01">
-            <p id="trackCategory" class="marquee-content text-[10px] sm:text-[11px] md:text-xs tracking-[0.22em] uppercase font-bold text-offwhite-muted whitespace-nowrap">
-              OUR VERSION • EXPERIENCE 01
-            </p>
-          </div>
-        </div>
-
-        <!-- Massive Track Title with Fixed Height & Marquee Auto-Scroll (Apple Music / Spotify Style) -->
-        <div id="trackTitleContainer" class="w-full max-w-full overflow-hidden marquee-container no-overflow h-8 sm:h-10 md:h-12 lg:h-14 xl:h-16 flex items-center select-none cinematic-item delay-title" title="DESIGN">
-          <h1 id="trackTitle" class="marquee-content text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl 2xl:text-8xl font-black font-display tracking-tight text-offwhite uppercase leading-none whitespace-nowrap">
-            DESIGN
-          </h1>
-        </div>
-
-        <!-- REAL-TIME SMOOTH WAVEFORM CANVAS (Responsive Height, directly between Title and Artist) -->
-        <div class="relative w-full bg-charcoal-card/60 backdrop-blur-md rounded-2xl border border-white/5 p-2 sm:p-2.5 md:p-3 shadow-2xl overflow-hidden group cinematic-item delay-canvas">
-          <div class="flex items-center justify-between text-[10px] sm:text-[11px] font-mono text-offwhite-dim uppercase tracking-wider mb-1 sm:mb-1.5">
-            <div class="flex items-center space-x-2">
-              <span class="w-1.5 h-1.5 rounded-full theme-transition" style="background-color: var(--accent-primary);"></span>
-              <span id="canvasModeLabel">Real-time Spectral Waveform</span>
-            </div>
-            <div class="flex items-center space-x-2">
-              <button id="toggleWaveStyle" class="text-offwhite-muted hover:text-[var(--accent-light)] transition-colors flex items-center space-x-1" title="Cycle visualizer modes">
-                <i data-lucide="sliders" class="w-3 h-3"></i>
-                <span id="waveStyleName">Wave</span>
-              </button>
-            </div>
-          </div>
-
-          <!-- Canvas for Audio Visualizer (Fluid adaptive responsive height) -->
-          <canvas id="waveformCanvas" class="w-full h-14 sm:h-16 md:h-18 lg:h-20 xl:h-22 max-h-[14vh] rounded-lg cursor-pointer" width="700" height="100"></canvas>
+        <!-- LEFT COLUMN: Typography, Smooth Real-time Waveform & Audio Controls -->
+        <section class="lg:col-span-6 flex flex-col justify-center space-y-2 sm:space-y-3 md:space-y-3.5 xl:space-y-4 lg:pr-2 xl:pr-6 z-20">
           
-          <!-- Glow reflection inside canvas box -->
-          <div id="canvasGlowReflection" class="absolute -bottom-6 left-1/2 transform -translate-x-1/2 w-3/4 h-8 blur-xl pointer-events-none theme-transition" style="background-color: rgba(var(--accent-glow-rgb), 0.35);"></div>
-        </div>
-
-        <!-- Artist & Editorial Description with Fixed Height & Marquee Auto-Scroll -->
-        <div class="space-y-1 max-w-xl w-full cinematic-item delay-artist">
-          <div id="trackArtistContainer" class="w-full max-w-full overflow-hidden marquee-container no-overflow h-4.5 sm:h-5 flex items-center" title="Sculpted by IconiWave Sound Lab">
-            <p id="trackArtist" class="marquee-content text-xs sm:text-sm font-semibold uppercase tracking-wider theme-transition whitespace-nowrap" style="color: var(--accent-light);">
-              Sculpted by IconiWave Sound Lab
-            </p>
+          <!-- Subtitle badge with overflow protection -->
+          <div class="flex items-center space-x-2 max-w-full overflow-hidden cinematic-item delay-title">
+            <span class="inline-block w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full animate-ping theme-transition shrink-0" style="background-color: var(--accent-primary);"></span>
+            <div id="trackCategoryContainer" class="overflow-hidden marquee-container no-overflow flex items-center flex-1" title="OUR VERSION • EXPERIENCE 01">
+              <p id="trackCategory" class="marquee-content text-[10px] sm:text-[11px] md:text-xs tracking-[0.22em] uppercase font-bold text-offwhite-muted whitespace-nowrap">
+                OUR VERSION • EXPERIENCE 01
+              </p>
+            </div>
           </div>
-          <p id="trackDescription" class="text-offwhite-muted text-xs sm:text-[13px] md:text-sm font-normal leading-relaxed line-clamp-2 md:line-clamp-3">
-            Our audio engine crafts a modern and soothing resonance, creating the key to deep immersion, ambient mindfulness, and emotional focus.
-          </p>
-        </div>
 
-        <!-- Interactive Controls (Circular Play/Pause button inspired by "See More" in Ref) -->
-        <div class="flex flex-wrap items-center gap-2 sm:gap-2.5 md:gap-3.5 pt-0.5 sm:pt-1 cinematic-item delay-controls">
-          <!-- Main circular Play / Pause Button with aura border -->
-          <button id="mainPlayBtn" class="flex items-center space-x-2 sm:space-x-2.5 group cursor-pointer">
-            <div id="playBtnCircle" class="relative flex items-center justify-center w-9 h-9 sm:w-11 sm:h-11 md:w-12 md:h-12 rounded-full border border-offwhite/30 transition-all duration-300 shadow-lg group-hover:border-[var(--accent-primary)] group-hover:bg-[var(--accent-primary)] group-hover:shadow-[0_0_30px_rgba(var(--accent-glow-rgb),0.85),0_0_15px_rgba(var(--accent-rgb),0.6)]">
-              <div id="playIconContainer" class="text-offwhite group-hover:text-white transition-colors transform group-hover:scale-110">
-                <i data-lucide="play" class="w-3.5 h-3.5 sm:w-4 sm:h-4 ml-0.5 fill-current"></i>
+          <!-- Massive Track Title with Fixed Height & Marquee Auto-Scroll -->
+          <div id="trackTitleContainer" class="w-full max-w-full overflow-hidden marquee-container no-overflow h-8 sm:h-10 md:h-12 lg:h-14 xl:h-16 flex items-center select-none cinematic-item delay-title" title="DESIGN">
+            <h1 id="trackTitle" class="marquee-content text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl 2xl:text-8xl font-black font-display tracking-tight text-offwhite uppercase leading-none whitespace-nowrap">
+              DESIGN
+            </h1>
+          </div>
+
+          <!-- REAL-TIME SMOOTH WAVEFORM CANVAS -->
+          <div class="relative w-full bg-charcoal-card/60 backdrop-blur-md rounded-2xl border border-white/5 p-2 sm:p-2.5 md:p-3 shadow-2xl overflow-hidden group cinematic-item delay-canvas">
+            <div class="flex items-center justify-between text-[10px] sm:text-[11px] font-mono text-offwhite-dim uppercase tracking-wider mb-1 sm:mb-1.5">
+              <div class="flex items-center space-x-2">
+                <span class="w-1.5 h-1.5 rounded-full theme-transition" style="background-color: var(--accent-primary);"></span>
+                <span id="canvasModeLabel">Real-time Spectral Waveform</span>
               </div>
-              <!-- Ripple aura ring -->
-              <div id="playRing" class="absolute inset-0 rounded-full border opacity-0 group-hover:opacity-100 animate-ping pointer-events-none" style="border-color: var(--accent-primary);"></div>
+              <div class="flex items-center space-x-2">
+                <button id="toggleWaveStyle" class="text-offwhite-muted hover:text-[var(--accent-light)] transition-colors flex items-center space-x-1" title="Cycle visualizer modes">
+                  <i data-lucide="sliders" class="w-3 h-3"></i>
+                  <span id="waveStyleName">Wave</span>
+                </button>
+              </div>
             </div>
-            <span id="playButtonText" class="text-xs sm:text-sm font-bold uppercase tracking-widest text-offwhite group-hover:text-[var(--accent-light)] transition-colors">
-              Play Experience
-            </span>
-          </button>
 
-          <!-- Preset Switcher (Next / Prev) -->
-          <div class="flex items-center space-x-1.5 bg-charcoal-card border border-white/10 rounded-full px-2 py-1 sm:px-2.5 sm:py-1.5">
-            <button id="prevTrackBtn" class="p-1 text-offwhite-muted hover:text-offwhite hover:bg-white/5 rounded-full transition-colors" title="Previous Preset">
-              <i data-lucide="skip-back" class="w-3.5 h-3.5"></i>
-            </button>
-            <span id="presetIndicator" class="text-[10px] sm:text-xs font-mono font-medium px-1 text-offwhite">01 / 03</span>
-            <button id="nextTrackBtn" class="p-1 text-offwhite-muted hover:text-offwhite hover:bg-white/5 rounded-full transition-colors" title="Next Preset">
-              <i data-lucide="skip-forward" class="w-3.5 h-3.5"></i>
-            </button>
-          </div>
-
-          <!-- Volume Control Slider -->
-          <div class="flex items-center space-x-1.5 bg-charcoal-card border border-white/10 rounded-full px-2.5 py-1 sm:px-3 sm:py-1.5">
-            <button id="muteBtn" class="text-offwhite-muted hover:text-offwhite transition-colors">
-              <i data-lucide="volume-2" id="volumeIcon" class="w-3.5 h-3.5"></i>
-            </button>
-            <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="0.75" class="w-14 sm:w-18 cursor-pointer">
-          </div>
-
-          <!-- Sound FX / Filter toggle button -->
-          <button id="fxLoFiBtn" class="flex items-center space-x-1.5 text-[10px] sm:text-xs font-semibold px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full border border-white/10 bg-charcoal-card hover:border-[var(--accent-primary)] text-offwhite-muted hover:text-offwhite transition-all">
-            <i data-lucide="disc" class="w-3.5 h-3.5 theme-transition" style="color: var(--accent-primary);"></i>
-            <span>Lo-Fi: <span id="fxStatus" class="font-mono theme-transition" style="color: var(--accent-primary);">OFF</span></span>
-          </button>
-        </div>
-
-      </section>
-
-      <!-- RIGHT COLUMN: Iconic Terracotta Circle & Sculpture / Artwork Graphic (Fluid Dynamic Heights) -->
-      <section class="lg:col-span-6 relative flex items-center justify-center h-full max-h-[40vh] sm:max-h-[46vh] md:max-h-[52vh] lg:max-h-[56vh] min-h-[200px] sm:min-h-[240px] lg:min-h-0 cinematic-item delay-artwork">
-        
-        <!-- Big Accent Circle (The defining design element from Reference 1 - Viewport Aware) -->
-        <div id="bigCircle" class="absolute w-[min(260px,30vh)] h-[min(260px,30vh)] sm:w-[min(320px,36vh)] sm:h-[min(320px,36vh)] lg:w-[min(380px,40vh)] lg:h-[min(380px,40vh)] xl:w-[420px] xl:h-[420px] rounded-full flex items-center justify-center transition-all duration-700 animate-orb" style="background: linear-gradient(135deg, var(--accent-light), var(--accent-primary), var(--accent-dark)); box-shadow: 0 0 50px rgba(var(--accent-glow-rgb), 0.65), 0 0 140px rgba(var(--accent-rgb), 0.55);">
-        </div>
-
-        <!-- Foreground Sculpture / Artwork Image with Duotone Blend -->
-        <div class="relative z-10 flex flex-col items-center group">
-          
-          <!-- Artwork frame with subtle floating animation (Clamped to viewport height) -->
-          <div class="relative w-[min(200px,24vh)] h-[min(250px,30vh)] sm:w-[min(250px,30vh)] sm:h-[min(300px,36vh)] lg:w-[min(300px,36vh)] lg:h-[min(360px,42vh)] xl:w-[350px] xl:h-[420px] flex items-center justify-center animate-float">
+            <!-- Canvas for Audio Visualizer -->
+            <canvas id="waveformCanvas" class="w-full h-14 sm:h-16 md:h-18 lg:h-20 xl:h-22 max-h-[14vh] rounded-lg cursor-pointer" width="700" height="100"></canvas>
             
-            <img id="artworkImage" 
-                 src="https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=900&q=80" 
-                 alt="Iconic Artwork" 
-                 class="max-w-full max-h-full object-contain filter drop-shadow-[0_20px_40px_rgba(0,0,0,0.8)] contrast-125 transition-all duration-500 rounded-2xl">
+            <!-- Glow reflection inside canvas box -->
+            <div id="canvasGlowReflection" class="absolute -bottom-6 left-1/2 transform -translate-x-1/2 w-3/4 h-8 blur-xl pointer-events-none theme-transition" style="background-color: rgba(var(--accent-glow-rgb), 0.35);"></div>
+          </div>
 
-            <!-- Duotone Accent Overlay Filter for seamless blend -->
-            <div id="duotoneOverlay" class="absolute inset-0 mix-blend-color pointer-events-none rounded-2xl theme-transition" style="background-color: rgba(var(--accent-rgb), 0.2);"></div>
+          <!-- Artist & Editorial Description with Fixed Height & Marquee Auto-Scroll -->
+          <div class="space-y-1 max-w-xl w-full cinematic-item delay-artist">
+            <div id="trackArtistContainer" class="w-full max-w-full overflow-hidden marquee-container no-overflow h-4.5 sm:h-5 flex items-center" title="Sculpted by IconiWave Sound Lab">
+              <p id="trackArtist" class="marquee-content text-xs sm:text-sm font-semibold uppercase tracking-wider theme-transition whitespace-nowrap" style="color: var(--accent-light);">
+                Sculpted by IconiWave Sound Lab
+              </p>
+            </div>
+            <p id="trackDescription" class="text-offwhite-muted text-xs sm:text-[13px] md:text-sm font-normal leading-relaxed line-clamp-2 md:line-clamp-3">
+              Our audio engine crafts a modern and soothing resonance, creating the key to deep immersion, ambient mindfulness, and emotional focus.
+            </p>
+          </div>
 
-            <!-- Quick artwork change button overlay -->
-            <div class="absolute bottom-2.5 right-2.5 sm:bottom-3 sm:right-3 flex space-x-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-              <label for="imageFileInput" class="p-1.5 sm:p-2 bg-charcoal/90 hover:bg-[var(--accent-primary)] border border-white/20 rounded-full cursor-pointer shadow-lg transition-all" title="Upload Custom Artwork">
-                <i data-lucide="image" class="w-3.5 h-3.5 text-offwhite"></i>
-              </label>
-              <input type="file" id="imageFileInput" accept="image/*" class="hidden">
+          <!-- Interactive Controls -->
+          <div class="flex flex-wrap items-center gap-2 sm:gap-2.5 md:gap-3.5 pt-0.5 sm:pt-1 cinematic-item delay-controls">
+            <!-- Main circular Play / Pause Button with aura border -->
+            <button id="mainPlayBtn" class="flex items-center space-x-2 sm:space-x-2.5 group cursor-pointer">
+              <div id="playBtnCircle" class="relative flex items-center justify-center w-9 h-9 sm:w-11 sm:h-11 md:w-12 md:h-12 rounded-full border border-offwhite/30 transition-all duration-300 shadow-lg group-hover:border-[var(--accent-primary)] group-hover:bg-[var(--accent-primary)] group-hover:shadow-[0_0_30px_rgba(var(--accent-glow-rgb),0.85),0_0_15px_rgba(var(--accent-rgb),0.6)]">
+                <div id="playIconContainer" class="text-offwhite group-hover:text-white transition-colors transform group-hover:scale-110">
+                  <i data-lucide="play" class="w-3.5 h-3.5 sm:w-4 sm:h-4 ml-0.5 fill-current"></i>
+                </div>
+                <!-- Ripple aura ring -->
+                <div id="playRing" class="absolute inset-0 rounded-full border opacity-0 group-hover:opacity-100 animate-ping pointer-events-none" style="border-color: var(--accent-primary);"></div>
+              </div>
+              <span id="playButtonText" class="text-xs sm:text-sm font-bold uppercase tracking-widest text-offwhite group-hover:text-[var(--accent-light)] transition-colors">
+                Play Experience
+              </span>
+            </button>
 
-              <button id="changeArtworkPresetBtn" class="p-1.5 sm:p-2 bg-charcoal/90 hover:bg-[var(--accent-primary)] border border-white/20 rounded-full cursor-pointer shadow-lg transition-all" title="Random Preset Artwork">
-                <i data-lucide="refresh-cw" class="w-3.5 h-3.5 text-offwhite"></i>
+            <!-- Preset Switcher (Next / Prev) -->
+            <div class="flex items-center space-x-1.5 bg-charcoal-card border border-white/10 rounded-full px-2 py-1 sm:px-2.5 sm:py-1.5">
+              <button id="prevTrackBtn" class="p-1 text-offwhite-muted hover:text-offwhite hover:bg-white/5 rounded-full transition-colors" title="Previous Preset">
+                <i data-lucide="skip-back" class="w-3.5 h-3.5"></i>
+              </button>
+              <span id="presetIndicator" class="text-[10px] sm:text-xs font-mono font-medium px-1 text-offwhite">01 / 04</span>
+              <button id="nextTrackBtn" class="p-1 text-offwhite-muted hover:text-offwhite hover:bg-white/5 rounded-full transition-colors" title="Next Preset">
+                <i data-lucide="skip-forward" class="w-3.5 h-3.5"></i>
               </button>
             </div>
+
+            <!-- Volume Control Slider -->
+            <div class="flex items-center space-x-1.5 bg-charcoal-card border border-white/10 rounded-full px-2.5 py-1 sm:px-3 sm:py-1.5">
+              <button id="muteBtn" class="text-offwhite-muted hover:text-offwhite transition-colors">
+                <i data-lucide="volume-2" id="volumeIcon" class="w-3.5 h-3.5"></i>
+              </button>
+              <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="0.75" class="w-14 sm:w-18 cursor-pointer">
+            </div>
+
+            <!-- Sound FX / Filter toggle button -->
+            <button id="fxLoFiBtn" class="flex items-center space-x-1.5 text-[10px] sm:text-xs font-semibold px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full border border-white/10 bg-charcoal-card hover:border-[var(--accent-primary)] text-offwhite-muted hover:text-offwhite transition-all">
+              <i data-lucide="disc" class="w-3.5 h-3.5 theme-transition" style="color: var(--accent-primary);"></i>
+              <span>Lo-Fi: <span id="fxStatus" class="font-mono theme-transition" style="color: var(--accent-primary);">OFF</span></span>
+            </button>
           </div>
 
-        </div>
+        </section>
 
-        <!-- Small Floating Accent Sphere at the bottom left (matches the small circle in reference image 1) -->
-        <div id="smallSphere" class="absolute bottom-0 left-2 sm:left-4 md:left-6 w-10 h-10 sm:w-13 sm:h-13 md:w-16 md:h-16 lg:w-[min(65px,8vh)] lg:h-[min(65px,8vh)] rounded-full z-20 pointer-events-none transform -translate-y-2 animate-bounce theme-transition" style="background: linear-gradient(to top, var(--accent-dark), var(--accent-primary)); box-shadow: 0 0 25px rgba(var(--accent-glow-rgb), 0.85), 0 10px 40px rgba(var(--accent-rgb), 0.65); animation-duration: 4s;"></div>
+        <!-- RIGHT COLUMN: Iconic Terracotta Circle & Sculpture / Artwork Graphic -->
+        <section class="lg:col-span-6 relative flex items-center justify-center h-full max-h-[40vh] sm:max-h-[46vh] md:max-h-[52vh] lg:max-h-[56vh] min-h-[200px] sm:min-h-[240px] lg:min-h-0 cinematic-item delay-artwork">
+          
+          <!-- Big Accent Circle -->
+          <div id="bigCircle" class="absolute w-[min(260px,30vh)] h-[min(260px,30vh)] sm:w-[min(320px,36vh)] sm:h-[min(320px,36vh)] lg:w-[min(380px,40vh)] lg:h-[min(380px,40vh)] xl:w-[420px] xl:h-[420px] rounded-full flex items-center justify-center transition-all duration-700 animate-orb" style="background: linear-gradient(135deg, var(--accent-light), var(--accent-primary), var(--accent-dark)); box-shadow: 0 0 50px rgba(var(--accent-glow-rgb), 0.65), 0 0 140px rgba(var(--accent-rgb), 0.55);">
+          </div>
 
-      </section>
+          <!-- Foreground Sculpture / Artwork Image with Duotone Blend -->
+          <div class="relative z-10 flex flex-col items-center group">
+            <div class="relative w-[min(200px,24vh)] h-[min(250px,30vh)] sm:w-[min(250px,30vh)] sm:h-[min(300px,36vh)] lg:w-[min(300px,36vh)] lg:h-[min(360px,42vh)] xl:w-[350px] xl:h-[420px] flex items-center justify-center animate-float">
+              
+              <img id="artworkImage" 
+                   src="https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=900&q=80" 
+                   alt="Iconic Artwork" 
+                   class="max-w-full max-h-full object-contain filter drop-shadow-[0_20px_40px_rgba(0,0,0,0.8)] contrast-125 transition-all duration-500 rounded-2xl">
 
-    </main>
+              <div id="duotoneOverlay" class="absolute inset-0 mix-blend-color pointer-events-none rounded-2xl theme-transition" style="background-color: rgba(var(--accent-rgb), 0.2);"></div>
 
-    <!-- ==================== BOTTOM BAR / PROGRESS SCRUBBER ==================== -->
-    <footer class="relative z-30 px-6 sm:px-10 lg:px-14 py-2 sm:py-2.5 md:py-3 flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-3 border-t border-white/5 bg-[#1B191A]/90 backdrop-blur-md shrink-0 cinematic-item delay-footer">
-    
-    <!-- Progress Indicator styled as "01 ────────── 03" as seen in the reference photo -->
-    <div class="flex items-center space-x-3 sm:space-x-4 w-full max-w-md">
-      <span id="footerCurrentIndex" class="text-xs font-mono font-bold text-offwhite tracking-widest">01</span>
+              <div class="absolute bottom-2.5 right-2.5 sm:bottom-3 sm:right-3 flex space-x-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <label for="imageFileInput" class="p-1.5 sm:p-2 bg-charcoal/90 hover:bg-[var(--accent-primary)] border border-white/20 rounded-full cursor-pointer shadow-lg transition-all" title="Upload Custom Artwork">
+                  <i data-lucide="image" class="w-3.5 h-3.5 text-offwhite"></i>
+                </label>
+                <input type="file" id="imageFileInput" accept="image/*" class="hidden">
+
+                <button id="changeArtworkPresetBtn" class="p-1.5 sm:p-2 bg-charcoal/90 hover:bg-[var(--accent-primary)] border border-white/20 rounded-full cursor-pointer shadow-lg transition-all" title="Random Preset Artwork">
+                  <i data-lucide="refresh-cw" class="w-3.5 h-3.5 text-offwhite"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Small Floating Accent Sphere -->
+          <div id="smallSphere" class="absolute bottom-0 left-2 sm:left-4 md:left-6 w-10 h-10 sm:w-13 sm:h-13 md:w-16 md:h-16 lg:w-[min(65px,8vh)] lg:h-[min(65px,8vh)] rounded-full z-20 pointer-events-none transform -translate-y-2 animate-bounce theme-transition" style="background: linear-gradient(to top, var(--accent-dark), var(--accent-primary)); box-shadow: 0 0 25px rgba(var(--accent-glow-rgb), 0.85), 0 10px 40px rgba(var(--accent-rgb), 0.65); animation-duration: 4s;"></div>
+
+        </section>
+
+      </main>
+
+      <!-- BOTTOM BAR / PROGRESS SCRUBBER -->
+      <footer class="relative z-30 px-6 sm:px-10 lg:px-14 py-2 sm:py-2.5 md:py-3 flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-3 border-t border-white/5 bg-[#1B191A]/90 backdrop-blur-md shrink-0 cinematic-item delay-footer">
       
-      <!-- Interactive Scrubber Bar with Scrub / Drag & Hover Preview -->
-      <div id="progressBarContainer" class="relative flex-1 py-2 sm:py-2.5 cursor-pointer group select-none flex items-center">
-        <!-- Background Track -->
-        <div class="h-1.5 w-full bg-charcoal-card rounded-full relative overflow-hidden">
-          <!-- Hover preview shadow bar -->
-          <div id="progressHoverFill" class="absolute left-0 top-0 h-full bg-white/10 rounded-full transition-all pointer-events-none" style="width: 0%;"></div>
-          <!-- Current playback fill -->
-          <div id="progressBarFill" class="h-full bg-offwhite group-hover:bg-[var(--accent-primary)] transition-all duration-75 rounded-full" style="width: 0%;"></div>
+        <!-- Progress Indicator -->
+        <div class="flex items-center space-x-3 sm:space-x-4 w-full max-w-md">
+          <span id="footerCurrentIndex" class="text-xs font-mono font-bold text-offwhite tracking-widest">01</span>
+          
+          <div id="progressBarContainer" class="relative flex-1 py-2 sm:py-2.5 cursor-pointer group select-none flex items-center">
+            <div class="h-1.5 w-full bg-charcoal-card rounded-full relative overflow-hidden">
+              <div id="progressHoverFill" class="absolute left-0 top-0 h-full bg-white/10 rounded-full transition-all pointer-events-none" style="width: 0%;"></div>
+              <div id="progressBarFill" class="h-full bg-offwhite group-hover:bg-[var(--accent-primary)] transition-all duration-75 rounded-full" style="width: 0%;"></div>
+            </div>
+            <div id="progressBarThumb" class="absolute top-1/2 -translate-y-1/2 w-3.5 h-3.5 bg-offwhite border-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-150 transform -translate-x-1/2 scale-90 group-hover:scale-110 pointer-events-none" style="left: 0%; border-color: var(--accent-primary); box-shadow: 0 0 18px rgba(var(--accent-glow-rgb), 1), 0 0 6px rgba(255, 255, 255, 0.9);"></div>
+            <div id="progressTooltip" class="absolute -top-6 -translate-x-1/2 px-2 py-0.5 bg-charcoal-card border border-white/15 rounded text-[10px] font-mono text-offwhite opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none shadow-xl">00:00</div>
+          </div>
+
+          <span id="footerTotalIndex" class="text-xs font-mono font-bold text-offwhite-dim tracking-widest">04</span>
         </div>
-        <!-- Draggable Scrubber Thumb Indicator with Enhanced Neon Glow -->
-        <div id="progressBarThumb" class="absolute top-1/2 -translate-y-1/2 w-3.5 h-3.5 bg-offwhite border-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-150 transform -translate-x-1/2 scale-90 group-hover:scale-110 pointer-events-none" style="left: 0%; border-color: var(--accent-primary); box-shadow: 0 0 18px rgba(var(--accent-glow-rgb), 1), 0 0 6px rgba(255, 255, 255, 0.9);"></div>
-        <!-- Time tooltip on hover -->
-        <div id="progressTooltip" class="absolute -top-6 -translate-x-1/2 px-2 py-0.5 bg-charcoal-card border border-white/15 rounded text-[10px] font-mono text-offwhite opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none shadow-xl">00:00</div>
-      </div>
 
-      <span id="footerTotalIndex" class="text-xs font-mono font-bold text-offwhite-dim tracking-widest">03</span>
+        <!-- Time & Engine Status -->
+        <div class="flex items-center space-x-4 sm:space-x-6 text-[11px] sm:text-xs font-mono text-offwhite-dim">
+          <div class="flex items-center space-x-2">
+            <span id="currentTimeDisplay">00:00</span>
+            <span>/</span>
+            <span id="durationDisplay">03:00</span>
+          </div>
+
+          <div class="hidden sm:flex items-center space-x-2">
+            <span class="w-2 h-2 rounded-full theme-transition" style="background-color: var(--accent-light);"></span>
+            <span id="engineStatusBadge">WebAudio Synthesizer Active</span>
+          </div>
+        </div>
+
+      </footer>
+
     </div>
 
-    <!-- Time & Engine Status -->
-    <div class="flex items-center space-x-4 sm:space-x-6 text-[11px] sm:text-xs font-mono text-offwhite-dim">
-      <div class="flex items-center space-x-2">
-        <span id="currentTimeDisplay">00:00</span>
-        <span>/</span>
-        <span id="durationDisplay">03:00</span>
-      </div>
+    <!-- ==================== VIEW 2: AUDIWAVE ROMANTIC CD DECK ==================== -->
+    <div id="cdDeckView" class="audiwave-skin-root w-full flex-1 flex flex-col justify-center items-center hidden transition-opacity duration-300 relative px-4 sm:px-8 lg:px-14 py-2">
+      
+      <div class="audiwave-vintage-app w-full flex flex-col justify-center items-center">
+        
+        <!-- Main Stage: Two-Column Centered Layout (CD Player & Jewel Case) -->
+        <main class="vintage-main-stage">
+          
+          <!-- MODULE 1: The Vintage CD Player Deck -->
+          <section class="cd-player-module" id="cdPlayerModule">
+            <div class="player-chassis vintage-wood-chassis">
+              
+              <!-- Antique Brass Corner Brackets & Screws -->
+              <div class="brass-corner-bracket corner-tl"></div>
+              <div class="brass-corner-bracket corner-tr"></div>
+              <div class="brass-corner-bracket corner-bl"></div>
+              <div class="brass-corner-bracket corner-br"></div>
+              
+              <div class="brass-screw screw-top-center"></div>
+              <div class="brass-screw screw-bottom-center"></div>
 
-      <div class="hidden sm:flex items-center space-x-2">
-        <span class="w-2 h-2 rounded-full theme-transition" style="background-color: var(--accent-light);"></span>
-        <span id="engineStatusBadge">WebAudio Synthesizer Active</span>
+              <!-- Gilded Nameplate Header -->
+              <div class="antique-nameplate">
+                <span class="filigree-leaf">❦</span>
+                <span class="nameplate-text">AUDIWAVE COMPACT DISC PHONOGRAM</span>
+                <span class="filigree-leaf">❧</span>
+              </div>
+
+              <!-- Quick Eject Button Beside Deck -->
+              <div class="deck-quick-action-bar">
+                <button class="deck-quick-eject-btn" id="btnDeckEject" title="Eject CD from Spindle">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                    <polygon points="12 4 4 14 20 14"/>
+                    <rect x="4" y="17" width="16" height="3" rx="1"/>
+                  </svg>
+                  <span>EJECT DISC</span>
+                </button>
+              </div>
+
+              <!-- Circular CD Compartment Deck -->
+              <div class="cd-deck-compartment vintage-deck-compartment" id="cdDeckDropZone" title="Drop CD here or click to load">
+                <div class="deck-basin vintage-basin">
+                  
+                  <!-- Amber Optical Laser Guide & Moving Lens -->
+                  <div class="optical-pickup-track vintage-laser-track">
+                    <div class="laser-pickup-head" id="laserPickupHead">
+                      <div class="laser-glass-lens amber-lens"></div>
+                      <div class="laser-beam-indicator amber-beam"></div>
+                    </div>
+                  </div>
+
+                  <!-- Antique Brass Center Spindle Hub -->
+                  <div class="center-spindle-hub vintage-brass-spindle" id="centerSpindleHub">
+                    <div class="spindle-outer-ring brass-ring">
+                      <div class="spindle-ball-lock ball-1"></div>
+                      <div class="spindle-ball-lock ball-2"></div>
+                      <div class="spindle-ball-lock ball-3"></div>
+                      <div class="spindle-center-core gold-core"></div>
+                    </div>
+                  </div>
+
+                  <!-- Warm Candlelight Amber Glow Halo -->
+                  <div class="deck-led-halo amber-halo" id="deckLedHalo"></div>
+
+                  <!-- Empty Deck Guidance -->
+                  <div class="deck-drop-hint vintage-drop-hint" id="deckDropHint">
+                    <div class="vintage-hint-icon">
+                      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <circle cx="12" cy="12" r="9"/>
+                        <circle cx="12" cy="12" r="3"/>
+                        <path d="M12 7v2M12 15v2M7 12h2M15 12h2"/>
+                      </svg>
+                    </div>
+                    <span class="hint-title">PLACE CD ON SPINDLE</span>
+                    <span class="hint-sub">DRAG OR CLICK DISC</span>
+                  </div>
+
+                  <!-- Loaded Disc Slot -->
+                  <div class="loaded-disc-slot" id="loadedDiscSlot"></div>
+                </div>
+
+                <div class="vintage-brass-bezel"></div>
+              </div>
+
+              <!-- Vintage Amber Glow Display Panel -->
+              <div class="player-dashboard vintage-dashboard">
+                <div class="vintage-amber-display" id="lcdDigitalScreen">
+                  <div class="amber-screen-glare"></div>
+
+                  <!-- Top Status Line -->
+                  <div class="lcd-top-line vintage-lcd-line">
+                    <div class="lcd-indicator-badges">
+                      <span class="lcd-badge active" id="lcdDiscIcon">● OPTICAL READY</span>
+                      <span class="lcd-badge active" id="lcdEspBadge">HI-FI TUBE</span>
+                      <span class="lcd-badge" id="lcdBassBadge">WARM TONE</span>
+                    </div>
+                    <div class="vintage-melody-status">44.1 kHz • STEREO</div>
+                  </div>
+
+                  <!-- Middle: Big Track & Time Counter -->
+                  <div class="lcd-main-counter vintage-counter-grid">
+                    <div class="lcd-track-block">
+                      <span class="lcd-small-label">TRACK</span>
+                      <span class="lcd-track-number vintage-amber-digits" id="lcdTrackNum">01</span>
+                    </div>
+
+                    <div class="lcd-status-display">
+                      <span class="lcd-status-text vintage-amber-title" id="lcdStatusText">READY</span>
+                      <span class="lcd-status-sub vintage-amber-sub" id="lcdStatusSub">DESIGN</span>
+                    </div>
+
+                    <div class="lcd-time-block">
+                      <span class="lcd-small-label">TIME</span>
+                      <span class="lcd-time-counter vintage-amber-digits" id="lcdTimeCounter">00:00</span>
+                    </div>
+                  </div>
+
+                  <!-- Bottom: Progress Track & Mini Spectrum -->
+                  <div class="lcd-bottom-line">
+                    <div class="lcd-progress-track vintage-progress-track" id="lcdProgressBarWrapper">
+                      <div class="lcd-progress-fill vintage-progress-fill" id="lcdProgressBarFill"></div>
+                    </div>
+                    <div class="lcd-mini-spectrum vintage-spectrum" id="lcdMiniSpectrum">
+                      <div class="spec-bar amber-bar"></div>
+                      <div class="spec-bar amber-bar"></div>
+                      <div class="spec-bar amber-bar"></div>
+                      <div class="spec-bar amber-bar"></div>
+                      <div class="spec-bar amber-bar"></div>
+                      <div class="spec-bar amber-bar"></div>
+                      <div class="spec-bar amber-bar"></div>
+                      <div class="spec-bar amber-bar"></div>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+
+              <!-- Tactile Keypad -->
+              <div class="player-keypad vintage-keypad">
+                <button class="key-btn vintage-key eject-crimson-key" id="btnEject" title="Eject Disc from Spindle">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <polygon points="12 4 4 14 20 14"/>
+                    <rect x="4" y="17" width="16" height="3" rx="1"/>
+                  </svg>
+                  <span>EJECT</span>
+                </button>
+
+                <button class="key-btn vintage-key" id="btnStop" title="Stop Playback">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                    <rect x="5" y="5" width="14" height="14" rx="2"/>
+                  </svg>
+                  <span>STOP</span>
+                </button>
+
+                <button class="key-btn vintage-key" id="btnPrev" title="Previous Track">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+                    <polygon points="19 20 9 12 19 4 19 20"/>
+                    <line x1="5" y1="19" x2="5" y2="5" stroke="currentColor" stroke-width="3"/>
+                  </svg>
+                </button>
+
+                <button class="key-btn vintage-key play-crimson-key" id="btnPlayPause" title="Play / Pause">
+                  <div class="play-icon-group" id="playIconGroup">
+                    <svg class="icon-play" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                      <polygon points="5 3 19 12 5 21 5 3"/>
+                    </svg>
+                    <svg class="icon-pause" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                      <rect x="6" y="4" width="4" height="16" rx="1"/>
+                      <rect x="14" y="4" width="4" height="16" rx="1"/>
+                    </svg>
+                  </div>
+                  <span id="playBtnLabel">PLAY</span>
+                </button>
+
+                <button class="key-btn vintage-key" id="btnNext" title="Next Track">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+                    <polygon points="5 4 15 12 5 20 5 4"/>
+                    <line x1="19" y1="5" x2="19" y2="19" stroke="currentColor" stroke-width="3"/>
+                  </svg>
+                </button>
+
+                <button class="key-btn vintage-key tone-boost-key" id="btnBassBoost" title="Toggle Tube Warmth & Bass">
+                  <span class="bass-led amber-pilot-lamp" id="bassLed"></span>
+                  <span>WARMTH</span>
+                </button>
+              </div>
+
+              <!-- Volume Slider & Socket Flank -->
+              <div class="player-flank-controls vintage-flank">
+                <div class="volume-slider-group flex items-center gap-2">
+                  <span class="slider-caption vintage-caption">MASTER VOLUME</span>
+                  <input type="range" id="cdVolumeSlider" min="0" max="100" value="75" class="vintage-brass-slider">
+                  <span class="volume-readout vintage-vol-readout" id="volumeReadout">75%</span>
+                </div>
+                <div class="headphone-socket vintage-socket" title="Stereo Headphone Output">
+                  <div class="socket-hole brass-socket-hole"></div>
+                  <span>PHONES</span>
+                </div>
+              </div>
+
+            </div>
+          </section>
+
+          <!-- MODULE 2: Vintage Rose Jewel Case & Romantic Disc Folio -->
+          <section class="disc-rack-module vintage-disc-rack">
+            
+            <div class="jewel-case-container">
+              <div class="jewel-case-frame vintage-book-case" id="jewelCaseFrame">
+                
+                <div class="case-spine vintage-leather-spine">
+                  <span>AUDIWAVE • NOSTALGIE ROMANTIQUE • OPUS 1902</span>
+                </div>
+
+                <div class="case-inlay vintage-parchment-inlay">
+                  <div class="case-inlay-banner vintage-banner">
+                    <span class="inlay-edition">ROMANTIC NOSTALGIA SERIES</span>
+                    <span class="inlay-title vintage-serif-title" id="inlayTrackTitle">DESIGN</span>
+                    <span class="inlay-artist vintage-artist-script" id="inlayArtist">IconiWave Sound Lab</span>
+                  </div>
+
+                  <!-- Disc Dock Area -->
+                  <div class="disc-dock-area" id="discDockArea">
+                    <div class="holographic-cd-disc vintage-cd-disc draggable-disc" id="cdDisc" draggable="true" title="Drag CD into Player or Click to Insert!">
+                      
+                      <!-- Layer 1: Hologram Surface -->
+                      <div class="cd-hologram-surface vintage-rose-hologram">
+                        <div class="rainbow-light-sheen rose-gold-sheen"></div>
+                        <div class="laser-track-grooves vintage-grooves"></div>
+                      </div>
+
+                      <!-- Layer 2: Graphic Skin Layer -->
+                      <div class="cd-screenprint-skin" id="cdScreenprintSkin">
+                        <img src="assets/skin_vintage_rose.jpg" id="cdSkinImg" class="cd-skin-img vintage-rose-skin" alt="Vintage Velvet Rose CD" draggable="false">
+                      </div>
+
+                      <!-- Layer 3: Gold Mirror Band -->
+                      <div class="cd-mirror-band gold-mirror-band"></div>
+
+                      <!-- Layer 4: Transparent Inner Hub -->
+                      <div class="cd-transparent-hub vintage-hub">
+                        <span class="cd-matrix-code vintage-matrix">ROSA-NOCTURNE-1902-CD</span>
+                      </div>
+
+                      <!-- Layer 5: Spindle Center Hole -->
+                      <div class="cd-center-hole vintage-hole"></div>
+
+                      <!-- Drag Handle Hint -->
+                      <div class="cd-drag-handle-hint vintage-drag-hint">
+                        <span class="hint-hand-icon">☞</span>
+                        <span>DRAG OR CLICK TO INSERT</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Jewel Tray Hub -->
+                  <div class="jewel-tray-hub vintage-tray-hub">
+                    <div class="tray-tooth t1"></div>
+                    <div class="tray-tooth t2"></div>
+                    <div class="tray-tooth t3"></div>
+                    <div class="tray-tooth t4"></div>
+                  </div>
+                </div>
+
+                <div class="case-hinge brass-hinge-top"></div>
+                <div class="case-hinge brass-hinge-bottom"></div>
+              </div>
+            </div>
+
+            <!-- Disc Selector Bar -->
+            <div class="disc-picker-toolbar vintage-picker-box">
+              <div class="picker-header-row">
+                <span class="picker-label vintage-picker-title">ROMANTIC RECORD SELECTION</span>
+                <span class="picker-ornament">❦</span>
+              </div>
+              <div class="disc-picker-buttons">
+                <button class="btn-disc-select vintage-disc-btn active" data-disc="vintage-rose" title="Disc 1: Victorian Velvet Rose">
+                  <span class="disc-swatch swatch-rose"></span>
+                  <span>1: Velvet Rose</span>
+                </button>
+                <button class="btn-disc-select vintage-disc-btn" data-disc="botanical" title="Disc 2: Botanical Plate Folio">
+                  <span class="disc-swatch swatch-botanical"></span>
+                  <span>2: Botanical Folio</span>
+                </button>
+                <button class="btn-disc-select vintage-disc-btn" data-disc="golden-sheen" title="Disc 3: Golden Champagne Mirror">
+                  <span class="disc-swatch swatch-champagne"></span>
+                  <span>3: Gold Champagne</span>
+                </button>
+              </div>
+            </div>
+
+          </section>
+
+        </main>
+
+        <!-- Hidden Custom Audio & Disc Art file inputs -->
+        <input type="file" id="cdAudioFileInput" accept="audio/*" class="hidden">
+        <input type="file" id="discArtInput" accept="image/*" class="hidden">
+
       </div>
     </div>
 
-    </footer>
   </div>
 
   <!-- ==================== MODAL: AUDIO SETTINGS & INFO ==================== -->
@@ -318,7 +629,7 @@
       <div class="flex items-center justify-between border-b border-white/10 pb-3">
         <div class="flex items-center space-x-2">
           <div class="w-2 h-5 theme-transition" style="background-color: var(--accent-primary);"></div>
-          <h3 class="text-lg font-bold font-display text-offwhite">About IconiWave Engine</h3>
+          <h3 class="text-lg font-bold font-display text-offwhite">About IconiWave & AudiWave</h3>
         </div>
         <button id="closeModalBtn" class="text-offwhite-muted hover:text-offwhite p-1">
           <i data-lucide="x" class="w-5 h-5"></i>
@@ -327,17 +638,16 @@
 
       <div class="text-xs text-offwhite-muted space-y-3 leading-relaxed">
         <p>
-          <strong class="text-offwhite">IconiWave</strong> is a minimalist single-page audio visualizer crafted in an editorial aesthetic inspired by Greek art and modern Bauhaus typography.
+          <strong class="text-offwhite">IconiWave</strong> is a dual-experience audio player featuring:
         </p>
         <div class="bg-charcoal p-3 rounded-lg border border-white/5 space-y-2">
           <div class="text-offwhite font-semibold">Features:</div>
           <ul class="list-disc list-inside space-y-1 text-offwhite-dim">
-            <li>Built-in real-time generative Ambient Polyphonic Synth</li>
-            <li>Custom audio file player (.mp3, .wav, .ogg, .m4a)</li>
-            <li>Real-time Web Audio Analyser node with multiple Canvas visualizer styles</li>
-            <li>Real-time Dynamic Palette Theme Switcher (6 distinct color themes)</li>
-            <li>Custom Artwork upload & switchable preset collection</li>
-            <li>Warm Vinyl Lo-Fi filter simulation</li>
+            <li><strong>Classic Mode:</strong> Minimalist Bauhaus visualizer with real-time waveform canvas and dynamic palettes.</li>
+            <li><strong>Romantic CD Deck:</strong> Retro AudiWave CD player with physical drag & drop spindle mechanics, laser optical head, tactile brass keypad, and velvet rose screenprints.</li>
+            <li>Continuous audio engine playback across both skin modes seamlessly.</li>
+            <li>Real-time Web Audio Analyser node with multi-style visualizer and generative synth presets.</li>
+            <li>Custom audio and disc screenprint artwork upload.</li>
           </ul>
         </div>
       </div>
@@ -354,4 +664,3 @@
   <script src="js/app.js"></script>
 </body>
 </html>
-
